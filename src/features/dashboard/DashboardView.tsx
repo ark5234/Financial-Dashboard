@@ -1,7 +1,7 @@
 ﻿import { useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { TrendUp, TrendDown, CurrencyDollar, ChartLineUp } from '@phosphor-icons/react';
+import { TrendUpIcon as TrendUp, TrendDownIcon as TrendDown, CurrencyDollarIcon as CurrencyDollar, ChartLineUpIcon as ChartLineUp } from '@phosphor-icons/react';
 import { format, parseISO, subMonths, isAfter } from 'date-fns';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#ec4899', '#f43f5e'];

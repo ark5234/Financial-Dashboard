@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# Finance Dashboard UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A clean, interactive, and responsive finance dashboard built to track and understand financial activity. This project was developed to evaluate frontend development skills, emphasizing user interface design, state management, and component architecture.
 
-Currently, two official plugins are available:
+## 🚀 Live Demo | Quick Start
+To run this project locally:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+# Install dependencies
+npm install
 
-## React Compiler
+# Start the development server
+npm run dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ✨ Core Features
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Dashboard Overview**
+   * **Summary Cards:** Dynamically calculates and displays Total Balance, Total Income, and Total Expenses.
+   * **Spending Breakdown:** A categorical `PieChart` visualizing exactly where money is going.
+   * **Balance Trend:** A time-based `AreaChart` illustrating the cumulative balance trend over time.
+   * **Insights:** Automatic calculations of the highest spending category and recent income history.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Transactions Management**
+   * **List & Details:** View an ordered list of transactions including Date, Amount, Category, and Type (Income/Expense).
+   * **CRUD Operations:** Easily add new transactions, edit existing ones, or delete them.
+   * **Filtering & Search:** Real-time search by description/category, and dropdown filters to isolate Income vs. Expense.
+   * **CSV Export:** One-click export of the currently filtered transactions to a `.csv` file.
+
+3. **Role-Based Access Control (RBAC) UI**
+   * Simulated frontend roles (`Admin` and `Viewer`) managed via global state.
+   * **Viewer:** Read-only access to the dashboard and transaction data.
+   * **Admin:** Full read/write access (can add, edit, and delete transactions).
+
+4. **Robust State Management & Persistence**
+   * Powered by **Zustand** for lightweight, scalable global state.
+   * **Local Storage Persistence:** All transactions, selected roles, and themes are persisted across browser reloads using Zustand's `persist` middleware.
+
+5. **Dark Mode & Responsive Design**
+   * Full Tailwind CSS dark mode integration.
+   * Fully responsive across mobile, tablet, and desktop screens.
+
+## 🛠️ Tech Stack & Architecture
+
+* **Framework:** React 18 (Vite)
+* **Language:** TypeScript 
+* **Styling:** Tailwind CSS (for rapid, utility-first styling and dark mode)
+* **State Management:** Zustand (chosen for its simplicity and built-in local storage persistence capabilities over Context/Redux)
+* **Charts:** Recharts (composable and highly responsive)
+* **Icons:** Phosphor Icons
+* **Dates:** date-fns (for reliable and lightweight date formatting)
+
+## 📐 Why This Approach?
+* **Why Zustand?** It provided the exact right level of complexity for this dashboard without the boilerplate of Redux, while natively handling LocalStorage persistence for the mock data.
+* **Why Tailwind?** Allowed for incredibly fast iteration of the UI and seamless dark-mode implementation using the `dark:` variant.
+* **Why Recharts?** Native React integration makes it simple to bind our dynamic Zustand state directly into beautiful, responsive SVG charts.

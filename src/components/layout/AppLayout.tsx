@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../../store/useStore';
-import { Sun, Moon, SquaresFour, Wallet } from '@phosphor-icons/react';
+import { SunIcon as Sun, MoonIcon as Moon, SquaresFourIcon as SquaresFour, WalletIcon as Wallet } from '@phosphor-icons/react';
 
 interface AppLayoutProps {
   children: React.ReactNode;

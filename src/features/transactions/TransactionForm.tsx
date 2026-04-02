@@ -1,7 +1,7 @@
-﻿import { useState, type FormEvent } from 'react';
+﻿import React, { useState } from 'react';
 import { useStore } from '../../store/useStore';
 import type { Transaction, TransactionType } from '../../store/useStore';
-import { X } from '@phosphor-icons/react';
+import { XIcon as X } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 
 interface TransactionFormProps {
@@ -18,7 +18,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
   const [category, setCategory] = useState(initialData?.category || '');
   const [date, setDate] = useState(initialData?.date || format(new Date(), 'yyyy-MM-dd'));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!description || !amount || !category || !date) return;
     
@@ -49,7 +49,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
           <h2 className="text-xl font-bold">{initialData ? 'Edit Transaction' : 'Add Transaction'}</h2>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
+          <button type="button" aria-label="Close" title="Close" onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -84,10 +84,11 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Amount</label>
+            <label htmlFor="amount" className="block text-sm font-medium mb-1">Amount</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
               <input 
+                id="amount"
                 type="number" 
                 step="0.01"
                 required
@@ -96,41 +97,49 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 font-medium"
                 placeholder="0.00"
+                title="Amount"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
+            <label htmlFor="description" className="block text-sm font-medium mb-1">Description</label>
             <input 
+              id="description"
               type="text" 
               required
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700"
               placeholder="e.g. Freelance Work, Utilities..."
+              title="Description"
             />
           </div>
 
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Date</label>
+              <label htmlFor="date" className="block text-sm font-medium mb-1">Date</label>
               <input 
+                id="date"
                 type="date" 
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-sm"
+                title="Date"
               />
             </div>
             
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">Category</label>
+              <label htmlFor="category" className="block text-sm font-medium mb-1">Category</label>
               <select 
+                id="category"
                 required
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-sm"
+                title="Category"
+                aria-label="Category"
               >
                 <option value="" disabled>Select category</option>
                 {isExpense ? (

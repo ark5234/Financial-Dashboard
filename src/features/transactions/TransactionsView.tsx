@@ -2,7 +2,7 @@
 import { useStore } from '../../store/useStore';
 import type { Transaction } from '../../store/useStore';
 import { format, parseISO } from 'date-fns';
-import { MagnifyingGlass as Search, DownloadSimple as Download, Plus, Funnel as Filter, Trash, PencilSimple as Edit2 } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon as Search, DownloadSimpleIcon as Download, PlusIcon as Plus, FunnelIcon as FilterIcon, TrashIcon as Trash, PencilSimpleIcon as Edit2 } from '@phosphor-icons/react';
 import { TransactionForm } from './TransactionForm';
 
 export function TransactionsView() {
@@ -77,17 +77,20 @@ export function TransactionsView() {
           <input 
             type="text" 
             placeholder="Search by description or category..." 
+            title="Search for transactions"
+            aria-label="Search transactions"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
         <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2">
-          <Filter className="w-4 h-4 text-gray-400" />
+          <FilterIcon className="w-4 h-4 text-gray-400" />
           <select 
             value={filterType} 
             onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
             className="bg-transparent border-none py-2 px-2 focus:ring-0 text-sm outline-none"
+            aria-label="Filter transactions by type"
           >
             <option value="all">All Types</option>
             <option value="income">Income Only</option>
