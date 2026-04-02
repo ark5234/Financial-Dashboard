@@ -161,8 +161,8 @@ export function DashboardView() {
                     data={spendingBreakdown}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={55}
+                    outerRadius={90}
                     paddingAngle={5}
                     dataKey="value"
                   >

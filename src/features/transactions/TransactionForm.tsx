@@ -145,7 +145,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                 {isExpense ? (
                   <>
                     <option value="Groceries">Groceries</option>
-                    <option value="Rent">Housing / Rent</option>
+                    <option value="Housing">Housing / Rent</option>
                     <option value="Utilities">Utilities</option>
                     <option value="Transport">Transport</option>
                     <option value="Entertainment">Entertainment</option>
