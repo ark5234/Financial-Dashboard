@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import type { Transaction } from '../../store/useStore';
 import { format, parseISO } from 'date-fns';

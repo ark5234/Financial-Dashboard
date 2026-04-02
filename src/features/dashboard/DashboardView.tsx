@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { TrendUp, TrendDown, CurrencyDollar, ChartLineUp } from '@phosphor-icons/react';
@@ -136,10 +136,10 @@ export function DashboardView() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
                   <XAxis dataKey="date" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                     itemStyle={{ color: '#60a5fa' }}
-                    formatter={(value: number) => [formatCurrency(value), 'Balance']}
+                    formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Balance']}
                   />
                   <Area type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorBalance)" />
                 </AreaChart>
@@ -166,12 +166,12 @@ export function DashboardView() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {spendingBreakdown.map((entry, index) => (
+                    {spendingBreakdown.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => formatCurrency(value)}
+                  <Tooltip
+                    formatter={(value: any) => formatCurrency(Number(value) || 0)}        
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                   />
                   <Legend 

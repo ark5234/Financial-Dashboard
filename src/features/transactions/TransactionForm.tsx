@@ -1,4 +1,4 @@
-﻿import React, { useState, FormEvent } from 'react';
+﻿import { useState, type FormEvent } from 'react';
 import { useStore } from '../../store/useStore';
 import type { Transaction, TransactionType } from '../../store/useStore';
 import { X } from '@phosphor-icons/react';

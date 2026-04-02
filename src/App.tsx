@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppLayout } from './components/layout/AppLayout';
 import { DashboardView } from './features/dashboard/DashboardView';
 import { TransactionsView } from './features/transactions/TransactionsView';
