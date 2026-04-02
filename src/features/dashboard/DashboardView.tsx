@@ -29,22 +29,22 @@ export function DashboardView() {
   // Balance Trend Data (Cumulative)
   const balanceTrendData = useMemo(() => {
     const sorted = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    let runningBalance = 0;
-    
     // Group by date to avoid multiple points on same day
-    const grouped = sorted.reduce((acc, curr) => {
+    const [grouped] = sorted.reduce((acc, curr) => {
+      const [arr] = acc;
+      let runningBalance = acc[1];
       const dateStr = format(parseISO(curr.date), 'MMM dd');
       if (curr.type === 'income') runningBalance += curr.amount;
       else runningBalance -= curr.amount;
-      
-      const existing = acc.find(item => item.date === dateStr);
+
+      const existing = arr.find((item) => item.date === dateStr);
       if (existing) {
         existing.balance = runningBalance;
       } else {
-        acc.push({ date: dateStr, balance: runningBalance });
+        arr.push({ date: dateStr, balance: runningBalance });
       }
-      return acc;
-    }, [] as any[]);
+      return [arr, runningBalance] as [{ date: string; balance: number }[], number];
+    }, [[], 0] as [{ date: string; balance: number }[], number]);
 
     return grouped;
   }, [transactions]);
@@ -139,7 +139,7 @@ export function DashboardView() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                     itemStyle={{ color: '#60a5fa' }}
-                    formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Balance']}
+                    formatter={(value: unknown) => [formatCurrency(Number(value) || 0), 'Balance']}
                   />
                   <Area type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorBalance)" />
                 </AreaChart>
@@ -171,7 +171,7 @@ export function DashboardView() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: any) => formatCurrency(Number(value) || 0)}        
+                    formatter={(value: unknown) => formatCurrency(Number(value) || 0)}        
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                   />
                   <Legend 

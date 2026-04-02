@@ -86,7 +86,7 @@ export function TransactionsView() {
           <Filter className="w-4 h-4 text-gray-400" />
           <select 
             value={filterType} 
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
             className="bg-transparent border-none py-2 px-2 focus:ring-0 text-sm outline-none"
           >
             <option value="all">All Types</option>
