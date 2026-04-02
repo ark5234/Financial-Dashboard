@@ -1,25 +1,47 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import React from 'react';
 import { useStore } from '../../store/useStore';
 import type { Transaction } from '../../store/useStore';
 import { format, parseISO } from 'date-fns';
-import { MagnifyingGlassIcon as Search, DownloadSimpleIcon as Download, PlusIcon as Plus, FunnelIcon as FilterIcon, TrashIcon as Trash, PencilSimpleIcon as Edit2 } from '@phosphor-icons/react';
+import {
+  MagnifyingGlassIcon as Search,
+  DownloadSimpleIcon as Download,
+  PlusIcon as Plus,
+  FunnelIcon as FilterIcon,
+  TrashIcon as Trash,
+  PencilSimpleIcon as Edit2,
+} from '@phosphor-icons/react';
 import { TransactionForm } from './TransactionForm';
-
 import { formatCurrency } from '../../utils/format';
 import { CATEGORY_CONFIG } from '../../utils/categories';
 
+const TYPE_BADGE: Record<string, string> = {
+  income:  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+  expense: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+  savings: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+};
+
+const AMOUNT_COLOR: Record<string, string> = {
+  income:  'text-emerald-600 dark:text-emerald-400',
+  expense: 'text-rose-600 dark:text-rose-400',
+  savings: 'text-violet-600 dark:text-violet-400',
+};
+
+const AMOUNT_PREFIX: Record<string, string> = {
+  income: '+', expense: '-', savings: '→',
+};
+
 export function TransactionsView() {
   const { transactions, currentRole, deleteTransaction, currency, addToast } = useStore();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [searchTerm, setSearchTerm]   = useState('');
+  const [filterType, setFilterType]   = useState<'all' | 'income' | 'expense' | 'savings'>('all');
+  const [isFormOpen, setIsFormOpen]   = useState(false);
+  const [editingTx, setEditingTx]     = useState<Transaction | null>(null);
 
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter((tx) => {
-        const matchesSearch = tx.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        const matchesSearch = tx.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                               tx.category.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = filterType === 'all' || tx.type === filterType;
         return matchesSearch && matchesType;
@@ -31,11 +53,10 @@ export function TransactionsView() {
     const headers = ['Date', 'Description', 'Category', 'Type', 'Amount'];
     const csvContent = [
       headers.join(','),
-      ...filteredTransactions.map(tx => 
+      ...filteredTransactions.map(tx =>
         [tx.date, `"${tx.description}"`, `"${tx.category}"`, tx.type, tx.amount].join(',')
       )
     ].join('\n');
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -52,53 +73,58 @@ export function TransactionsView() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold">Recent Transactions</h2>
+        <h2 className="text-2xl font-bold">All Transactions</h2>
         <div className="flex items-center gap-2">
           {currentRole === 'Admin' && (
             <button
+              id="add-transaction-btn"
               onClick={() => { setEditingTx(null); setIsFormOpen(true); }}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm font-semibold"
             >
               <Plus className="w-4 h-4" />
               Add Transaction
             </button>
           )}
           <button
+            id="export-csv-btn"
             onClick={handleExportCSV}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-lg transition text-sm"
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
       </div>
 
-      {/* Filters & Search */}
-      <div className="flex flex-col sm:flex-row gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="relative flex-1">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search by description or category..." 
-            title="Search for transactions"
+          <input
+            id="tx-search"
+            type="text"
+            placeholder="Search by description or category..."
             aria-label="Search transactions"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
           />
         </div>
-        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2">
-          <FilterIcon className="w-4 h-4 text-gray-400" />
-          <select 
-            value={filterType} 
-            onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
-            className="bg-transparent border-none py-2 px-2 focus:ring-0 text-sm outline-none"
-            aria-label="Filter transactions by type"
+        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3">
+          <FilterIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <select
+            id="tx-filter-type"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as typeof filterType)}
+            className="bg-transparent border-none py-2 text-sm outline-none cursor-pointer"
+            aria-label="Filter by type"
           >
             <option value="all">All Types</option>
-            <option value="income">Income Only</option>
-            <option value="expense">Expense Only</option>
+            <option value="income">Income</option>
+            <option value="expense">Expenses</option>
+            <option value="savings">Savings</option>
           </select>
         </div>
       </div>
@@ -106,55 +132,61 @@ export function TransactionsView() {
       {/* Table */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400 text-sm uppercase">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 text-gray-500 dark:bg-gray-800/80 dark:text-gray-400 uppercase text-xs tracking-wider">
               <tr>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium">Description</th>
-                <th className="px-6 py-4 font-medium">Category</th>
-                <th className="px-6 py-4 font-medium">Amount</th>
-                {currentRole === 'Admin' && <th className="px-6 py-4 font-medium text-right">Actions</th>}
+                <th className="px-5 py-3.5 font-semibold">Date</th>
+                <th className="px-5 py-3.5 font-semibold">Description</th>
+                <th className="px-5 py-3.5 font-semibold">Category</th>
+                <th className="px-5 py-3.5 font-semibold">Type</th>
+                <th className="px-5 py-3.5 font-semibold text-right">Amount</th>
+                {currentRole === 'Admin' && <th className="px-5 py-3.5 font-semibold text-right">Actions</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
+                    <td className="px-5 py-3.5 whitespace-nowrap text-gray-500">
                       {format(parseISO(tx.date), 'MMM dd, yyyy')}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium">{tx.description}</div>
+                    <td className="px-5 py-3.5">
+                      <span className="font-medium">{tx.description}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${CATEGORY_CONFIG[tx.category]?.color || 'bg-gray-100 text-gray-800'}`}>
-                        {CATEGORY_CONFIG[tx.category]?.Icon && React.createElement(CATEGORY_CONFIG[tx.category].Icon, { className: "mr-1 w-3.5 h-3.5" })}
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${CATEGORY_CONFIG[tx.category]?.color || 'bg-gray-100 text-gray-700'}`}>
+                        {CATEGORY_CONFIG[tx.category]?.Icon && React.createElement(CATEGORY_CONFIG[tx.category].Icon, { className: 'w-3.5 h-3.5' })}
                         {tx.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount, currency)}
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold capitalize ${TYPE_BADGE[tx.type]}`}>
+                        {tx.type}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                      <span className={`font-semibold tabular-nums ${AMOUNT_COLOR[tx.type]}`}>
+                        {AMOUNT_PREFIX[tx.type]}{formatCurrency(tx.amount, currency)}
                       </span>
                     </td>
                     {currentRole === 'Admin' && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <button 
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                        <button
                           onClick={() => handleEdit(tx)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mx-2 p-1"
-                          title="Edit"
+                          className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
+                          title="Edit transaction"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button 
-                          onClick={() => { 
-                            if(confirm('Are you sure?')) {
+                        <button
+                          onClick={() => {
+                            if (confirm('Delete this transaction?')) {
                               deleteTransaction(tx.id);
                               addToast('Transaction deleted', 'error');
                             }
                           }}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                          title="Delete"
+                          className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition"
+                          title="Delete transaction"
                         >
                           <Trash className="w-4 h-4" />
                         </button>
@@ -164,7 +196,7 @@ export function TransactionsView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={currentRole === 'Admin' ? 6 : 5} className="px-5 py-14 text-center text-gray-400 italic">
                     No transactions found.
                   </td>
                 </tr>
@@ -172,12 +204,17 @@ export function TransactionsView() {
             </tbody>
           </table>
         </div>
+        {filteredTransactions.length > 0 && (
+          <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400">
+            Showing {filteredTransactions.length} record{filteredTransactions.length !== 1 ? 's' : ''}
+          </div>
+        )}
       </div>
 
       {isFormOpen && (
-        <TransactionForm 
-          onClose={() => setIsFormOpen(false)} 
-          initialData={editingTx || undefined} 
+        <TransactionForm
+          onClose={() => setIsFormOpen(false)}
+          initialData={editingTx || undefined}
         />
       )}
     </div>
