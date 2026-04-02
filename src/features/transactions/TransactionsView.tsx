@@ -113,7 +113,7 @@ export function TransactionsView() {
           />
         </div>
         <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3">
-          <FilterIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <FilterIcon className="w-4 h-4 text-gray-400 shrink-0" />
           <select
             id="tx-filter-type"
             value={filterType}

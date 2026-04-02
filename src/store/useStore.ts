@@ -39,6 +39,7 @@ interface AppState {
   selectedMonth: number;
   selectedYear: number;
   currentPage: Page;
+  budgetModalOpen: boolean;
 
   // Actions
   setRole: (role: Role) => void;
@@ -53,6 +54,8 @@ interface AppState {
   setSelectedMonth: (month: number) => void;
   setSelectedYear: (year: number) => void;
   setCurrentPage: (page: Page) => void;
+  openBudgetModal: () => void;
+  closeBudgetModal: () => void;
 }
 
 const MOCK_TRANSACTIONS: Transaction[] = [
@@ -144,6 +147,7 @@ export const useStore = create<AppState>()(
       selectedMonth: 3,
       selectedYear: 2026,
       currentPage: 'dashboard' as Page,
+      budgetModalOpen: false,
 
 
       setRole: (role) => set({ currentRole: role }),
@@ -151,6 +155,9 @@ export const useStore = create<AppState>()(
       setSelectedMonth: (month) => set({ selectedMonth: month }),
       setSelectedYear: (year) => set({ selectedYear: year }),
       setCurrentPage: (page) => set({ currentPage: page }),
+      openBudgetModal: () => set({ budgetModalOpen: true }),
+      closeBudgetModal: () => set({ budgetModalOpen: false }),
+
 
       addToast: (msg, type) => set((state) => ({ toasts: [...state.toasts, { id: Math.random().toString(), msg, type }] })),
       removeToast: (id) => set((state) => ({ toasts: state.toasts.filter(t => t.id !== id) })),
@@ -193,14 +200,21 @@ export const useStore = create<AppState>()(
       }),
     }),
     {
-      name: 'finance-dashboard-storage-v2',
+      name: 'finance-dashboard-v3',
+      // Only persist real user data — never transient UI state
+      partialize: (state) => ({
+        transactions:  state.transactions,
+        budgets:       state.budgets,
+        theme:         state.theme,
+        currency:      state.currency,
+        currentRole:   state.currentRole,
+        selectedMonth: state.selectedMonth,
+        selectedYear:  state.selectedYear,
+        currentPage:   state.currentPage,
+      }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          if (state.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
+          document.documentElement.classList.toggle('dark', state.theme === 'dark');
         }
       },
     }

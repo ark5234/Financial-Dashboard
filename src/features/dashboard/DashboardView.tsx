@@ -1,164 +1,217 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import type { TransactionType } from '../../store/useStore';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
 import { getMonth, getYear, parseISO } from 'date-fns';
 import { formatCurrency } from '../../utils/format';
 import { CATEGORY_CONFIG } from '../../utils/categories';
-import { BudgetModal } from './BudgetModal';
-import { SlidersIcon } from '@phosphor-icons/react';
+import { ArrowUpIcon, ArrowDownIcon, PiggyBankIcon, TrendUpIcon } from '@phosphor-icons/react';
 
-// ── percent ───────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
 function pct(tracked: number, budget: number) {
   return budget > 0 ? Math.round((tracked / budget) * 100) : 0;
 }
+function pctBarColor(p: number) {
+  if (p >= 100) return 'bg-rose-400';
+  if (p >= 80)  return 'bg-amber-400';
+  return 'bg-emerald-400';
+}
+function pctTextColor(p: number, type: TransactionType) {
+  if (type === 'income') return p >= 100 ? 'text-emerald-600' : 'text-amber-600';
+  if (p >= 100) return 'text-rose-600';
+  if (p >= 80)  return 'text-amber-600';
+  return 'text-stone-400';
+}
 
-// ── PctCell ───────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// KPI Card
+// ─────────────────────────────────────────────────────────────────────────────
 
-function PctCell({ value, type }: { value: number; type: TransactionType }) {
-  const cfg =
-    type === 'income'
-      ? { bar: 'bg-emerald-500', over: 'bg-amber-400', text: value >= 100 ? 'text-amber-500' : 'text-emerald-500' }
-      : type === 'expense'
-      ? { bar: 'bg-rose-400',    over: 'bg-rose-600',   text: value >= 100 ? 'text-rose-500'  : 'text-gray-400'   }
-      : { bar: 'bg-violet-500',  over: 'bg-violet-700', text: 'text-violet-500' };
-
+interface KpiProps {
+  label: string; value: string; sub?: string; isLight: boolean;
+  topColor: string; Icon: React.ElementType;
+  iconBg: string; iconColor: string; valueColor?: string;
+  children?: React.ReactNode;
+}
+function KpiCard({ label, value, sub, isLight, topColor, Icon, iconBg, iconColor, valueColor, children }: KpiProps) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="w-16 bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 shrink-0">
-        <div className={`${value >= 100 ? cfg.over : cfg.bar} h-1.5 rounded-full`} style={{ width: `${Math.min(value, 100)}%` }} />
+    <div className={`
+      card-lift rounded-2xl p-6 relative overflow-hidden border-t-4 ${topColor} select-none
+      ${isLight
+        ? 'bg-white border border-gray-200 shadow-sm'
+        : 'bg-slate-800 border border-slate-700'}
+    `}>
+      <div className="flex items-start justify-between mb-4 relative">
+        <p className={`text-xs font-semibold uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+          {label}
+        </p>
+        <div className={`p-2 rounded-lg ${isLight ? iconBg : 'bg-slate-700'}`}>
+          <Icon size={14} className={isLight ? iconColor : 'text-slate-400'} weight="bold" />
+        </div>
       </div>
-      <span className={`text-xs font-bold tabular-nums shrink-0 w-10 ${cfg.text}`}>{value}%</span>
+      <p className={`text-3xl font-bold tabular-nums tracking-tight relative ${
+        valueColor || (isLight ? 'text-gray-900' : 'text-slate-100')
+      }`}>{value}</p>
+      {sub && <p className={`text-sm mt-1 relative ${isLight ? 'text-slate-400' : 'text-slate-400'}`}>{sub}</p>}
+      {children}
     </div>
   );
 }
 
-// ── Breakdown Table ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Breakdown Table
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface BreakdownRow { category: string; tracked: number; budget: number; }
-interface BreakdownTableProps {
-  title: string; type: TransactionType; rows: BreakdownRow[];
-  currency: string; headerColor: string;
-}
 
-function BreakdownTable({ title, type, rows, currency, headerColor }: BreakdownTableProps) {
+function BreakdownTable({ title, type, rows, currency, accent, isLight }:
+  { title: string; type: TransactionType; rows: BreakdownRow[]; currency: string; accent: string; isLight: boolean }) {
   const totalTracked = rows.reduce((s, r) => s + r.tracked, 0);
   const totalBudget  = rows.reduce((s, r) => s + r.budget,  0);
+
+  const cardCls = isLight
+    ? 'bg-white border border-gray-200 shadow-sm'
+    : 'bg-slate-800 border border-slate-700';
+  const hdCls   = isLight ? 'text-slate-500 bg-gray-50' : 'text-slate-400 bg-slate-900/40';
+  const rowHov  = isLight ? 'hover:bg-amber-50/30' : 'hover:bg-slate-700/20';
+  const divCls  = isLight ? 'divide-gray-100' : 'divide-slate-700/50';
+  const foot    = isLight ? 'bg-gray-50 border-t-2 border-gray-100' : 'bg-slate-900/30 border-t-2 border-slate-600';
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className={`${headerColor} text-white`}>
-              <th className="w-8 px-2 py-2.5" />
-              <th className="px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide">{title}</th>
-              <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide whitespace-nowrap">Tracked</th>
-              <th className="px-4 py-2.5 text-right text-xs font-bold uppercase tracking-wide whitespace-nowrap">Budget</th>
-              <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide whitespace-nowrap">% Done</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-5 text-center text-gray-400 italic text-sm">No data for this period</td></tr>
-            ) : rows.map((row) => {
-              const p = pct(row.tracked, row.budget);
-              const Icon = CATEGORY_CONFIG[row.category]?.Icon;
-              return (
-                <tr key={row.category} className="border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
-                  <td className="px-2 py-3 text-center text-gray-400">{Icon && <Icon className="w-3.5 h-3.5" />}</td>
-                  <td className="px-3 py-3 font-medium">{row.category}</td>
-                  <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">{formatCurrency(row.tracked, currency)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-gray-400 whitespace-nowrap">
-                    {row.budget ? formatCurrency(row.budget, currency) : <span className="italic text-xs">–</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    {row.budget ? <PctCell value={p} type={type} /> : <span className="text-xs text-gray-400">–</span>}
-                  </td>
-                </tr>
-              );
-            })}
-            <tr className="bg-gray-50 dark:bg-slate-900/50 border-t-2 border-gray-200 dark:border-slate-600 font-bold">
-              <td />
-              <td className="px-3 py-3 text-xs uppercase tracking-wider">Total</td>
-              <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">{formatCurrency(totalTracked, currency)}</td>
-              <td className="px-4 py-3 text-right tabular-nums text-gray-400 whitespace-nowrap">{formatCurrency(totalBudget, currency)}</td>
-              <td className="px-4 py-3">{totalBudget > 0 && <PctCell value={pct(totalTracked, totalBudget)} type={type} />}</td>
-            </tr>
-          </tbody>
-        </table>
+    <div className={`rounded-2xl overflow-hidden ${cardCls}`}>
+      {/* Ribbon header */}
+      <div className={`px-4 py-3 flex items-center justify-between ${accent}`}>
+        <span className="text-xs font-bold uppercase tracking-wider text-white">{title}</span>
+        <span className="text-xs font-semibold text-white/90 tabular-nums">
+          {formatCurrency(totalTracked, currency)}
+          {totalBudget > 0 && (
+            <span className="text-white/60 ml-1">/ {formatCurrency(totalBudget, currency)}</span>
+          )}
+        </span>
       </div>
+
+      <table className="w-full text-sm">
+        <thead>
+          <tr className={`text-xs font-bold uppercase tracking-wide ${hdCls}`}>
+            <th className="w-8 px-3 py-2.5" />
+            <th className="px-3 py-2.5 text-left">Category</th>
+            <th className="px-4 py-2.5 text-right whitespace-nowrap">Tracked</th>
+            <th className="px-4 py-2.5 text-right whitespace-nowrap">Budget</th>
+            <th className="px-4 py-2.5 text-left whitespace-nowrap">Progress</th>
+          </tr>
+        </thead>
+        <tbody className={`divide-y ${divCls}`}>
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-amber-600/50' : 'text-slate-500'}`}>
+                No data for this period
+              </td>
+            </tr>
+          ) : rows.map(row => {
+            const p = pct(row.tracked, row.budget);
+            const Icon = CATEGORY_CONFIG[row.category]?.Icon;
+            return (
+              <tr key={row.category} className={`transition-colors ${rowHov}`}>
+                <td className="px-3 py-4 text-center">
+                  {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-amber-300' : 'text-slate-500'}`} />}
+                </td>
+                <td className={`px-3 py-4 font-medium text-sm ${isLight ? 'text-stone-800' : 'text-slate-200'}`}>
+                  {row.category}
+                </td>
+                <td className={`px-4 py-4 text-right tabular-nums font-bold text-sm ${isLight ? 'text-stone-900' : 'text-slate-100'}`}>
+                  {formatCurrency(row.tracked, currency)}
+                </td>
+                <td className={`px-4 py-4 text-right tabular-nums text-sm ${isLight ? 'text-slate-600' : 'text-slate-500'}`}>
+                  {row.budget ? formatCurrency(row.budget, currency) : <span className="italic">–</span>}
+                </td>
+                <td className="px-4 py-4">
+                  {row.budget > 0 ? (
+                    <div className="flex items-center gap-2 min-w-[110px]">
+                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                        <div className={`${pctBarColor(p)} h-2 rounded-full transition-all`}
+                          style={{ width: `${Math.min(p, 100)}%` }} />
+                      </div>
+                      <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
+                        {p}%
+                      </span>
+                    </div>
+                  ) : (
+                    <span className={`text-xs ${isLight ? 'text-amber-300' : 'text-slate-600'}`}>–</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+          {/* Footer row */}
+          <tr className={foot}>
+            <td />
+            <td className={`px-3 py-3 text-xs font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+              Total
+            </td>
+            <td className={`px-4 py-3 text-right tabular-nums text-sm font-bold ${isLight ? 'text-gray-900' : 'text-slate-200'}`}>
+              {formatCurrency(totalTracked, currency)}
+            </td>
+            <td className={`px-4 py-3 text-right tabular-nums text-sm ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+              {formatCurrency(totalBudget, currency)}
+            </td>
+            <td className="px-4 py-3">
+              {totalBudget > 0 && (() => {
+                const p = pct(totalTracked, totalBudget);
+                return (
+                  <div className="flex items-center gap-2 min-w-[110px]">
+                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                      <div className={`${pctBarColor(p)} h-2 rounded-full`} style={{ width: `${Math.min(p, 100)}%` }} />
+                    </div>
+                    <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
+                      {p}%
+                    </span>
+                  </div>
+                );
+              })()}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
 
-// ── Donut Card ────────────────────────────────────────────────────────────────
-
-interface DonutCardProps {
-  title: string; accentClass: string;
-  data: { name: string; value: number; fill: string }[];
-  total: number; currency: string; emptyMsg: string;
-}
-
-function DonutCard({ title, accentClass, data, total, currency, emptyMsg }: DonutCardProps) {
-  return (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col">
-      <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 ${accentClass}`}>{title}</h3>
-      {data.length > 0 ? (
-        <>
-          <div className="h-[130px]" style={{ minWidth: 0 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={data} cx="50%" cy="50%" innerRadius={38} outerRadius={58} paddingAngle={2} dataKey="value" stroke="none">
-                  {data.map((e, i) => <Cell key={i} fill={e.fill} />)}
-                </Pie>
-                <Tooltip
-                  formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''}
-                  contentStyle={{ backgroundColor: '#1e293b', color: '#f8fafc', borderRadius: '8px', border: 'none', fontSize: '11px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-2 space-y-1 flex-1">
-            {data.map(item => (
-              <div key={item.name} className="flex items-center justify-between gap-1">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.name}</span>
-                </div>
-                <span className="text-xs font-semibold tabular-nums shrink-0">{formatCurrency(item.value, currency)}</span>
-              </div>
-            ))}
-            <div className="border-t border-gray-100 dark:border-slate-700 pt-1 mt-1 flex justify-between">
-              <span className="text-xs font-bold">Total</span>
-              <span className="text-xs font-bold tabular-nums">{formatCurrency(total, currency)}</span>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm italic h-32">{emptyMsg}</div>
-      )}
-    </div>
-  );
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
 
 const MONTHS       = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TT_STYLE     = {
+  backgroundColor: '#0f172a', color: '#f8fafc',
+  borderRadius: '10px', border: '1px solid rgba(245,158,11,0.2)',
+  fontSize: '12px', padding: '8px 12px',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function DashboardView() {
-  const { transactions, budgets, currency, currentRole, selectedMonth, selectedYear } = useStore();
-  const [budgetOpen, setBudgetOpen] = useState(false);
+  const { transactions, budgets, currency, selectedMonth, selectedYear, theme } = useStore();
+  const isLight = theme === 'light';
 
+  // ── Filtered transactions ──────────────────────────────────────────────────
   const monthlyTx = useMemo(() =>
-    transactions.filter(t => getMonth(parseISO(t.date)) === selectedMonth && getYear(parseISO(t.date)) === selectedYear),
+    transactions.filter(t =>
+      getMonth(parseISO(t.date)) === selectedMonth &&
+      getYear(parseISO(t.date)) === selectedYear
+    ),
     [transactions, selectedMonth, selectedYear]
   );
 
+  // ── KPI numbers ───────────────────────────────────────────────────────────
   const { periodIncome, periodExpenses, periodSavings } = useMemo(() =>
     monthlyTx.reduce(
       (acc, t) => {
@@ -177,52 +230,43 @@ export function DashboardView() {
   const budgetIncome     = budgets.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
   const incomeTrackedPct = budgetIncome > 0 ? Math.round((periodIncome / budgetIncome) * 100) : 0;
 
-  // Breakdown tables
-  const incomeRows = useMemo(() => {
+  // ── Breakdown data ─────────────────────────────────────────────────────────
+  const makeBreakdown = (type: TransactionType): BreakdownRow[] => {
     const grouped: Record<string, number> = {};
-    monthlyTx.filter(t => t.type === 'income').forEach(t => { grouped[t.category] = (grouped[t.category] || 0) + t.amount; });
-    const budgetMap: Record<string, number> = {};
-    budgets.filter(b => b.type === 'income').forEach(b => { budgetMap[b.category] = b.amount; });
-    return [...new Set([...Object.keys(grouped), ...Object.keys(budgetMap)])]
-      .map(cat => ({ category: cat, tracked: grouped[cat] || 0, budget: budgetMap[cat] || 0 }))
+    monthlyTx.filter(t => t.type === type).forEach(t => {
+      grouped[t.category] = (grouped[t.category] || 0) + t.amount;
+    });
+    const bMap: Record<string, number> = {};
+    budgets.filter(b => b.type === type).forEach(b => { bMap[b.category] = b.amount; });
+    return [...new Set([...Object.keys(grouped), ...Object.keys(bMap)])]
+      .map(cat => ({ category: cat, tracked: grouped[cat] || 0, budget: bMap[cat] || 0 }))
       .sort((a, b) => b.tracked - a.tracked);
-  }, [monthlyTx, budgets]);
+  };
 
-  const expenseRows = useMemo(() => {
-    const grouped: Record<string, number> = {};
-    monthlyTx.filter(t => t.type === 'expense').forEach(t => { grouped[t.category] = (grouped[t.category] || 0) + t.amount; });
-    const budgetMap: Record<string, number> = {};
-    budgets.filter(b => b.type === 'expense').forEach(b => { budgetMap[b.category] = b.amount; });
-    return [...new Set([...Object.keys(grouped), ...Object.keys(budgetMap)])]
-      .map(cat => ({ category: cat, tracked: grouped[cat] || 0, budget: budgetMap[cat] || 0 }))
-      .sort((a, b) => b.tracked - a.tracked);
-  }, [monthlyTx, budgets]);
+  const incomeRows  = useMemo(() => makeBreakdown('income'),  [monthlyTx, budgets]);  // eslint-disable-line
+  const expenseRows = useMemo(() => makeBreakdown('expense'), [monthlyTx, budgets]);  // eslint-disable-line
+  const savingsRows = useMemo(() => makeBreakdown('savings'), [monthlyTx, budgets]);  // eslint-disable-line
 
-  const savingsRows = useMemo(() => {
-    const grouped: Record<string, number> = {};
-    monthlyTx.filter(t => t.type === 'savings').forEach(t => { grouped[t.category] = (grouped[t.category] || 0) + t.amount; });
-    const budgetMap: Record<string, number> = {};
-    budgets.filter(b => b.type === 'savings').forEach(b => { budgetMap[b.category] = b.amount; });
-    return [...new Set([...Object.keys(grouped), ...Object.keys(budgetMap)])]
-      .map(cat => ({ category: cat, tracked: grouped[cat] || 0, budget: budgetMap[cat] || 0 }))
-      .sort((a, b) => b.tracked - a.tracked);
-  }, [monthlyTx, budgets]);
+  // ── Spending donut (expenses) ─────────────────────────────────────────────
+  const spendingDonut = useMemo(() =>
+    expenseRows
+      .filter(r => r.tracked > 0)
+      .map(r => ({ name: r.category, value: r.tracked, fill: CATEGORY_CONFIG[r.category]?.fill || '#94a3b8' }))
+      .sort((a, b) => b.value - a.value),
+    [expenseRows]
+  );
 
-  // Donut data
-  const makeDonut = (type: TransactionType) =>
-    monthlyTx.filter(t => t.type === type).reduce((acc, t) => {
-      const e = acc.find(x => x.name === t.category);
-      if (e) e.value += t.amount;
-      else acc.push({ name: t.category, value: t.amount, fill: CATEGORY_CONFIG[t.category]?.fill || '#94a3b8' });
-      return acc;
-    }, [] as { name: string; value: number; fill: string }[]).sort((a, b) => b.value - a.value);
+  // ── Budget vs Actual bars ─────────────────────────────────────────────────
+  const budgetBars = useMemo(() =>
+    expenseRows
+      .filter(r => r.budget > 0)
+      .map(r => ({ name: r.category, tracked: r.tracked, budget: r.budget, p: pct(r.tracked, r.budget) }))
+      .sort((a, b) => b.p - a.p),
+    [expenseRows]
+  );
 
-  const incomeDonut  = useMemo(() => makeDonut('income'),  [monthlyTx]);  // eslint-disable-line
-  const expenseDonut = useMemo(() => makeDonut('expense'), [monthlyTx]);  // eslint-disable-line
-  const savingsDonut = useMemo(() => makeDonut('savings'), [monthlyTx]);  // eslint-disable-line
-
-  // Bar chart
-  const barData = useMemo(() =>
+  // ── Monthly bar data ──────────────────────────────────────────────────────
+  const monthData = useMemo(() =>
     SHORT_MONTHS.map((name, i) => {
       let income = 0, expenses = 0, savings = 0;
       transactions
@@ -237,89 +281,250 @@ export function DashboardView() {
     [transactions, selectedYear]
   );
 
-  const TT = { contentStyle: { backgroundColor: '#1e293b', color: '#f8fafc', borderRadius: '8px', border: 'none' }, itemStyle: { fontSize: '12px' } };
+  // ── YTD ───────────────────────────────────────────────────────────────────
+  const ytd = useMemo(() => {
+    const now = new Date();
+    const cutoff = selectedYear < now.getFullYear() ? 11 : now.getMonth();
+    const ytdTx = transactions.filter(t => {
+      const d = parseISO(t.date);
+      return getYear(d) === selectedYear && getMonth(d) <= cutoff;
+    });
+    const income   = ytdTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expenses = ytdTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const savings  = ytdTx.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0);
+    return { income, expenses, savings, rate: income > 0 ? ((savings / income) * 100).toFixed(1) : '0.0' };
+  }, [transactions, selectedYear]);
+
+  // ── Style shortcuts ───────────────────────────────────────────────────────
+  const card      = isLight ? 'bg-white border border-gray-200 shadow-sm rounded-2xl' : 'bg-slate-800 border border-slate-700 rounded-2xl';
+  const label     = isLight ? 'text-slate-500'    : 'text-slate-400';
+  const labelMini = isLight ? 'text-slate-400'    : 'text-slate-500';
+  const heading   = isLight ? 'text-gray-900'     : 'text-slate-100';
+  const gridLine  = isLight ? '#e2e8f0'           : '#334155';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
 
-      {/* Period label */}
+      {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">{MONTHS[selectedMonth]} {selectedYear}</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Personal finance overview</p>
+        <h1 className={`text-2xl font-bold tracking-tight ${heading}`}>
+          {MONTHS[selectedMonth]} {selectedYear}
+        </h1>
+        <p className={`text-sm mt-0.5 ${labelMini}`}>Personal finance overview</p>
       </div>
 
-      {/* KPI row */}
+      {/* ── 3 KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Period Balance</p>
-          <p className={`text-3xl font-extrabold tabular-nums ${netBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{formatCurrency(netBalance, currency)}</p>
-          <p className="text-xs text-gray-400 mt-1">income – expenses – savings</p>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Savings Rate</p>
-          <p className="text-3xl font-extrabold text-violet-500 tabular-nums">{savingsRate}%</p>
-          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mt-3">
-            <div className="bg-violet-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, parseFloat(savingsRate))}%` }} />
+
+        <KpiCard
+          label="Period Balance"
+          value={formatCurrency(netBalance, currency)}
+          sub="income – expenses – savings"
+          isLight={isLight}
+          topColor={netBalance >= 0 ? 'border-t-emerald-500' : 'border-t-rose-500'}
+          Icon={netBalance >= 0 ? TrendUpIcon : ArrowDownIcon}
+          iconBg={netBalance >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}
+          iconColor={netBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}
+          valueColor={
+            netBalance >= 0
+              ? (isLight ? 'text-emerald-600' : 'text-emerald-400')
+              : (isLight ? 'text-rose-600'    : 'text-rose-400')
+          }
+        />
+
+        <KpiCard
+          label="Savings Rate"
+          value={`${savingsRate}%`}
+          isLight={isLight}
+          topColor="border-t-amber-500"
+          Icon={PiggyBankIcon}
+          iconBg="bg-amber-50"
+          iconColor="text-amber-600"
+          valueColor={isLight ? 'text-amber-700' : 'text-amber-400'}
+        >
+          <div className={`w-full rounded-full h-2 mt-3 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+            <div
+              className="bg-amber-500 h-2 rounded-full transition-all"
+              style={{ width: `${Math.min(100, parseFloat(savingsRate))}%` }}
+            />
           </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Income Tracked</p>
-          <p className={`text-3xl font-extrabold tabular-nums ${incomeTrackedPct >= 100 ? 'text-emerald-500' : 'text-amber-500'}`}>{incomeTrackedPct}%</p>
-          <p className="text-xs text-gray-400 mt-1">vs {formatCurrency(budgetIncome, currency)} budget</p>
-        </div>
+        </KpiCard>
+
+        <KpiCard
+          label="Income Tracked"
+          value={`${incomeTrackedPct}%`}
+          sub={`vs ${formatCurrency(budgetIncome, currency)} budget`}
+          isLight={isLight}
+          topColor={incomeTrackedPct >= 100 ? 'border-t-emerald-500' : 'border-t-amber-400'}
+          Icon={ArrowUpIcon}
+          iconBg={incomeTrackedPct >= 100 ? 'bg-emerald-50' : 'bg-amber-50'}
+          iconColor={incomeTrackedPct >= 100 ? 'text-emerald-600' : 'text-amber-600'}
+          valueColor={
+            incomeTrackedPct >= 100
+              ? (isLight ? 'text-emerald-600' : 'text-emerald-400')
+              : (isLight ? 'text-amber-700'   : 'text-amber-400')
+          }
+        />
       </div>
 
-      {/* Main grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+      {/* ── Main Grid ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 
-        {/* Breakdown tables */}
+        {/* LEFT: Breakdown Tables */}
         <div className="xl:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">Breakdown — {MONTHS[selectedMonth].slice(0,3)} {selectedYear}</h2>
-            {currentRole === 'Admin' && (
-              <button id="set-budgets-btn" onClick={() => setBudgetOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg transition">
-                <SlidersIcon className="w-3.5 h-3.5" /> Set Budgets
-              </button>
+          <p className={`text-xs font-bold uppercase tracking-[0.14em] ${label}`}>
+            Breakdown — {MONTHS[selectedMonth].slice(0, 3)} {selectedYear}
+          </p>
+          <BreakdownTable title="Income"   type="income"  accent="bg-emerald-600" rows={incomeRows}  currency={currency} isLight={isLight} />
+          <BreakdownTable title="Expenses" type="expense" accent="bg-rose-500"    rows={expenseRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Savings"  type="savings" accent="bg-amber-500"   rows={savingsRows} currency={currency} isLight={isLight} />
+        </div>
+
+        {/* RIGHT: Charts */}
+        <div className="xl:col-span-3 space-y-5">
+          <p className={`text-xs font-bold uppercase tracking-[0.14em] ${label}`}>
+            Summary — {MONTHS[selectedMonth].slice(0, 3)} {selectedYear}
+          </p>
+
+          {/* Spending Breakdown Donut */}
+          <div className={`${card} p-5`}>
+            <h3 className={`text-xs font-bold uppercase tracking-[0.14em] mb-4 ${label}`}>
+              Monthly Spending Breakdown
+            </h3>
+            <div className="flex gap-5 items-center">
+              {/* Donut chart */}
+              <div className="shrink-0 w-[150px] h-[150px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={spendingDonut.length > 0 ? spendingDonut : [{ name: 'None', value: 1, fill: isLight ? '#fde68a' : '#1e293b' }]}
+                      cx="50%" cy="50%"
+                      innerRadius={44} outerRadius={68}
+                      paddingAngle={spendingDonut.length > 1 ? 2 : 0}
+                      dataKey="value" stroke="none"
+                    >
+                      {(spendingDonut.length > 0
+                        ? spendingDonut
+                        : [{ name: 'None', value: 1, fill: isLight ? '#fde68a' : '#1e293b' }]
+                      ).map((e, i) => <Cell key={i} fill={e.fill} />)}
+                    </Pie>
+                    <Tooltip
+                      formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''}
+                      contentStyle={TT_STYLE}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Legend */}
+              <div className="flex-1 space-y-2 min-w-0">
+                {spendingDonut.length === 0 ? (
+                  <p className={`text-sm italic ${labelMini}`}>No expense data</p>
+                ) : spendingDonut.slice(0, 6).map(item => (
+                  <div key={item.name} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
+                      <span className={`text-xs truncate ${isLight ? 'text-stone-600' : 'text-slate-400'}`}>{item.name}</span>
+                    </div>
+                    <span className={`text-xs font-bold tabular-nums shrink-0 ${isLight ? 'text-stone-900' : 'text-slate-200'}`}>
+                      {formatCurrency(item.value, currency)}
+                    </span>
+                  </div>
+                ))}
+                <div className={`pt-2 mt-1 border-t ${isLight ? 'border-amber-100' : 'border-slate-700'} flex items-center justify-between`}>
+                  <span className={`text-xs font-bold ${label}`}>Total Expenses</span>
+                  <span className={`text-xs font-bold tabular-nums ${isLight ? 'text-rose-600' : 'text-rose-400'}`}>
+                    {formatCurrency(periodExpenses, currency)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Budget vs. Actual Progress Bars */}
+          <div className={`${card} p-5`}>
+            <h3 className={`text-xs font-bold uppercase tracking-[0.14em] mb-4 ${label}`}>
+              Budget vs. Actual — Expenses
+            </h3>
+            {budgetBars.length === 0 ? (
+              <p className={`text-sm italic ${labelMini}`}>
+                No budget set — click "Set Budgets" to add one
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {budgetBars.map(row => (
+                  <div key={row.name}>
+                    {/* Label row */}
+                    <div className="flex items-center justify-between gap-3 mb-1.5">
+                      <span className={`text-xs font-semibold truncate min-w-0 ${isLight ? 'text-stone-700' : 'text-slate-300'}`}>
+                        {row.name}
+                      </span>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-xs tabular-nums ${labelMini}`}>
+                          {formatCurrency(row.tracked, currency)} / {formatCurrency(row.budget, currency)}
+                        </span>
+                        <span className={`text-xs font-bold tabular-nums w-10 text-right ${
+                          row.p >= 100 ? 'text-rose-600' : row.p >= 80 ? 'text-amber-600' : 'text-emerald-600'
+                        }`}>{row.p}%</span>
+                      </div>
+                    </div>
+                    {/* Bar */}
+                    <div className={`w-full rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                      <div
+                        className={`${pctBarColor(row.p)} h-2 rounded-full transition-all duration-500`}
+                        style={{ width: `${Math.min(row.p, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-          <BreakdownTable title="Income"   type="income"  rows={incomeRows}  currency={currency} headerColor="bg-emerald-600" />
-          <BreakdownTable title="Expenses" type="expense" rows={expenseRows} currency={currency} headerColor="bg-rose-500"    />
-          <BreakdownTable title="Savings"  type="savings" rows={savingsRows} currency={currency} headerColor="bg-violet-600"  />
-        </div>
 
-        {/* Charts */}
-        <div className="xl:col-span-3 space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">Summary — {MONTHS[selectedMonth].slice(0,3)} {selectedYear}</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <DonutCard title="Income"   accentClass="text-emerald-500" data={incomeDonut}  total={periodIncome}   currency={currency} emptyMsg="No income"   />
-            <DonutCard title="Expenses" accentClass="text-rose-500"    data={expenseDonut} total={periodExpenses} currency={currency} emptyMsg="No expenses" />
-            <DonutCard title="Savings"  accentClass="text-violet-500"  data={savingsDonut} total={periodSavings}  currency={currency} emptyMsg="No savings"  />
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Monthly Overview — {selectedYear}</h3>
-            <div className="h-[250px]" style={{ minWidth: 0 }}>
+          {/* Monthly Overview Bar Chart */}
+          <div className={`${card} p-5`}>
+            <h3 className={`text-xs font-bold uppercase tracking-[0.14em] mb-4 ${label}`}>
+              Monthly Overview — {selectedYear}
+            </h3>
+            <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.1} />
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false}
-                    tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
-                  />
-                  <Tooltip {...TT} formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''} cursor={{ fill: 'rgba(148,163,184,0.07)' }} />
-                  <Bar dataKey="income"   name="Income"   fill="#10b981" radius={[3,3,0,0]} maxBarSize={22} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#f43f5e" radius={[3,3,0,0]} maxBarSize={22} />
-                  <Bar dataKey="savings"  name="Savings"  fill="#8b5cf6" radius={[3,3,0,0]} maxBarSize={22} />
+                <BarChart data={monthData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridLine} opacity={0.6} />
+                  <XAxis dataKey="name" stroke="#92400e" fontSize={10} tickLine={false} axisLine={false} dy={8} />
+                  <YAxis stroke="#92400e" fontSize={10} tickLine={false} axisLine={false}
+                    tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
+                  <Tooltip contentStyle={TT_STYLE} cursor={{ fill: 'rgba(245,158,11,0.05)' }}
+                    formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''} />
+                  <Bar dataKey="income"   name="Income"   fill="#10b981" radius={[3,3,0,0]} maxBarSize={16} />
+                  <Bar dataKey="expenses" name="Expenses" fill="#f43f5e" radius={[3,3,0,0]} maxBarSize={16} />
+                  <Bar dataKey="savings"  name="Savings"  fill="#f59e0b" radius={[3,3,0,0]} maxBarSize={16} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* YTD Stats */}
+          <div>
+            <p className={`text-xs font-bold uppercase tracking-[0.14em] mb-3 ${label}`}>
+              Year-to-Date — {selectedYear}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { key: 'income',   lbl: 'YTD Income',   val: formatCurrency(ytd.income,   currency), accent: 'border-t-emerald-500', vc: isLight ? 'text-emerald-700' : 'text-emerald-400' },
+                { key: 'expenses', lbl: 'YTD Expenses', val: formatCurrency(ytd.expenses, currency), accent: 'border-t-rose-500',    vc: isLight ? 'text-rose-700'    : 'text-rose-400'    },
+                { key: 'savings',  lbl: 'YTD Savings',  val: formatCurrency(ytd.savings,  currency), accent: 'border-t-amber-500',   vc: isLight ? 'text-amber-700'   : 'text-amber-400'   },
+                { key: 'rate',     lbl: 'Savings Rate', val: `${ytd.rate}%`,                         accent: 'border-t-amber-400',   vc: isLight ? 'text-amber-700'   : 'text-amber-400'   },
+              ].map(s => (
+                <div key={s.key} className={`card-lift ${card} p-4 border-t-4 ${s.accent}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-[0.14em] mb-2 ${labelMini}`}>{s.lbl}</p>
+                  <p className={`text-base font-bold tabular-nums ${s.vc}`}>{s.val}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
-
-      {budgetOpen && <BudgetModal onClose={() => setBudgetOpen(false)} />}
     </div>
   );
 }
