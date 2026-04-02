@@ -1,12 +1,16 @@
 ﻿import { useState, useMemo } from 'react';
+import React from 'react';
 import { useStore } from '../../store/useStore';
 import type { Transaction } from '../../store/useStore';
 import { format, parseISO } from 'date-fns';
 import { MagnifyingGlassIcon as Search, DownloadSimpleIcon as Download, PlusIcon as Plus, FunnelIcon as FilterIcon, TrashIcon as Trash, PencilSimpleIcon as Edit2 } from '@phosphor-icons/react';
 import { TransactionForm } from './TransactionForm';
 
+import { formatCurrency } from '../../utils/format';
+import { CATEGORY_CONFIG } from '../../utils/categories';
+
 export function TransactionsView() {
-  const { transactions, currentRole, deleteTransaction } = useStore();
+  const { transactions, currentRole, deleteTransaction, currency, addToast } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -123,13 +127,14 @@ export function TransactionsView() {
                       <div className="font-medium">{tx.description}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${CATEGORY_CONFIG[tx.category]?.color || 'bg-gray-100 text-gray-800'}`}>
+                        {CATEGORY_CONFIG[tx.category]?.Icon && React.createElement(CATEGORY_CONFIG[tx.category].Icon, { className: "mr-1 w-3.5 h-3.5" })}
                         {tx.category}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount, currency)}
                       </span>
                     </td>
                     {currentRole === 'Admin' && (
@@ -142,7 +147,12 @@ export function TransactionsView() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => { if(confirm('Are you sure?')) deleteTransaction(tx.id) }}
+                          onClick={() => { 
+                            if(confirm('Are you sure?')) {
+                              deleteTransaction(tx.id);
+                              addToast('Transaction deleted', 'error');
+                            }
+                          }}
                           className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
                           title="Delete"
                         >

@@ -3,11 +3,11 @@ import { useStore } from '../../store/useStore';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { TrendUpIcon as TrendUp, TrendDownIcon as TrendDown, CurrencyDollarIcon as CurrencyDollar, ChartLineUpIcon as ChartLineUp } from '@phosphor-icons/react';
 import { format, parseISO, subMonths, isAfter } from 'date-fns';
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#ec4899', '#f43f5e'];
+import { formatCurrency } from '../../utils/format';
+import { CATEGORY_CONFIG } from '../../utils/categories';
 
 export function DashboardView() {
-  const { transactions } = useStore();
+  const { transactions, currency } = useStore();
 
   // Summary Metrics
   const { totalBalance, totalIncome, totalExpenses } = useMemo(() => {
@@ -58,12 +58,16 @@ export function DashboardView() {
     }, {} as Record<string, number>);
 
     return Object.entries(grouped)
-      .map(([name, value]) => ({ name, value }))
+      .map(([name, value]) => ({ 
+        name, 
+        value, 
+        fill: CATEGORY_CONFIG[name]?.fill || '#6b7280' 
+      }))
       .sort((a, b) => b.value - a.value);
   }, [transactions]);
 
   // Insights
-  const highestCategory = spendingBreakdown[0];
+  const highestCategory = spendingBreakdown.length > 0 ? spendingBreakdown[0] : null;
   
   const lastMonthIncome = useMemo(() => {
     const oneMonthAgo = subMonths(new Date(), 1);
@@ -71,9 +75,6 @@ export function DashboardView() {
       .filter(t => t.type === 'income' && isAfter(parseISO(t.date), oneMonthAgo))
       .reduce((sum, t) => sum + t.amount, 0);
   }, [transactions]);
-
-  // Formatting utils
-  const formatCurrency = (val: number) => `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <div className="space-y-6">
@@ -89,7 +90,7 @@ export function DashboardView() {
             <CurrencyDollar className="w-5 h-5 text-gray-400" />
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold">{formatCurrency(totalBalance)}</span>
+            <span className="text-3xl font-bold">{formatCurrency(totalBalance, currency)}</span>
           </div>
         </div>
 
@@ -101,7 +102,7 @@ export function DashboardView() {
             </div>
           </div>
           <div className="mt-4">
-            <span className="text-3xl font-bold">{formatCurrency(totalIncome)}</span>
+            <span className="text-3xl font-bold">{formatCurrency(totalIncome, currency)}</span>
           </div>
         </div>
 
@@ -113,7 +114,7 @@ export function DashboardView() {
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold">{formatCurrency(totalExpenses)}</span>
+            <span className="text-3xl font-bold">{formatCurrency(totalExpenses, currency)}</span>
           </div>
         </div>
       </div>
@@ -135,11 +136,11 @@ export function DashboardView() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
                   <XAxis dataKey="date" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                  <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(val)} />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                     itemStyle={{ color: '#60a5fa' }}
-                    formatter={(value: unknown) => [formatCurrency(Number(value) || 0), 'Balance']}
+                    formatter={(value: unknown) => [formatCurrency(Number(value) || 0, currency), 'Balance']}
                   />
                   <Area type="monotone" dataKey="balance" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorBalance)" />
                 </AreaChart>
@@ -166,12 +167,12 @@ export function DashboardView() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {spendingBreakdown.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {spendingBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: unknown) => formatCurrency(Number(value) || 0)}        
+                    formatter={(value: unknown) => formatCurrency(Number(value) || 0, currency)}        
                     contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                   />
                   <Legend 
@@ -198,13 +199,13 @@ export function DashboardView() {
           <div className="bg-white/60 dark:bg-gray-800/60 p-4 rounded-lg">
             <p className="text-sm text-gray-600 dark:text-gray-400">Highest Spending Category</p>
             <p className="text-lg font-medium mt-1">
-              {highestCategory ? `${highestCategory.name} (${formatCurrency(highestCategory.value)})` : 'None'}
+              {highestCategory ? `${highestCategory.name} (${formatCurrency(highestCategory.value, currency)})` : 'N/A'}
             </p>
           </div>
           <div className="bg-white/60 dark:bg-gray-800/60 p-4 rounded-lg">
             <p className="text-sm text-gray-600 dark:text-gray-400">Recent Income (Last 30 Days)</p>
             <p className="text-lg font-medium mt-1 text-green-600 dark:text-green-400">
-              {formatCurrency(lastMonthIncome)}
+              {formatCurrency(lastMonthIncome, currency)}
             </p>
           </div>
         </div>

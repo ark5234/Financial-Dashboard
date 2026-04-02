@@ -35,8 +35,10 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
 
     if (initialData) {
       updateTransaction(initialData.id, data);
+      useStore.getState().addToast('Transaction updated successfully', 'success');
     } else {
       addTransaction(data);
+      useStore.getState().addToast('Transaction added successfully', 'success');
     }
     
     onClose();
