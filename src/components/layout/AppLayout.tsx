@@ -257,7 +257,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                       : 'text-light-secondary hover:text-gray-100 hover:bg-light-card/5'
                 }`}
               >
-                {role === 'Viewer' ? <span className="sm:hidden">View</span> : <span className="sm:hidden">Edit</span>}
+                {role === 'Viewer' ? <span className="sm:hidden">View</span> : <span className="sm:hidden">Admin</span>}
                 <span className="hidden sm:inline">{role}</span>
               </button>
             ))}

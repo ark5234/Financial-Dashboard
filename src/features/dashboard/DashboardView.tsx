@@ -374,7 +374,7 @@ export function DashboardView() {
             <div className="flex gap-5 items-center">
               {/* Donut chart */}
               <div className="shrink-0 w-[150px] h-[150px] min-h-[150px] min-w-[150px]">
-                <ResponsiveContainer width="100%" height="auto" aspect={1}>
+                <ResponsiveContainer width="100%" height="100%" aspect={1}>
                   <PieChart>
                     <Pie
                       data={spendingDonut.length > 0 ? spendingDonut : [{ name: 'None', value: 1, fill: isLight ? '#E2E8F0' : '#1e293b' }]}
