@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore, type Currency, type Page } from '../../store/useStore';
 import {
   SunIcon as Sun, MoonIcon as Moon, WalletIcon as Wallet,
   ChartPieIcon, ListBulletsIcon, CalendarBlankIcon, SlidersIcon,
+  ListIcon as MenuIcon, XIcon as CloseIcon
 } from '@phosphor-icons/react';
 import { ToastContainer } from '../ui/ToastContainer';
 import { BudgetModal } from '../../features/dashboard/BudgetModal';
@@ -32,6 +33,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     budgetModalOpen, openBudgetModal, closeBudgetModal,
   } = useStore();
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const isLight = theme === 'light';
 
   const activeNav = NAV_ITEMS.find(n => n.page === currentPage);
@@ -44,9 +47,19 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className={`min-h-screen flex transition-colors duration-300 ${isLight ? 'bg-light-bg' : 'bg-dark'}`}>
 
+      {/* ────────────────────── OVERLAY FOR MOBILE SIDEBAR ────────────────── */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 sm:hidden transition-opacity touch-none"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* ────────────────────── SIDEBAR ────────────────────────────────── */}
       <aside
-        className={`${SIDE_W} hidden sm:flex flex-col shrink-0 transition-colors duration-300 ${
+        className={`${SIDE_W} ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } sm:translate-x-0 sm:static fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 transition-transform duration-300 ${
           isLight
             ? 'bg-light-card border-r border-light-border'
             : 'bg-dark border-r border-dark-border'
@@ -54,15 +67,26 @@ export function AppLayout({ children }: AppLayoutProps) {
         style={!isLight ? { boxShadow: '4px 0 24px rgba(0,0,0,0.35)' } : undefined}
       >
         {/* Logo */}
-        <div className={`${NAV_H} px-4 flex items-center gap-3 shrink-0 border-b ${
+        <div className={`${NAV_H} px-4 flex items-center justify-between gap-3 shrink-0 border-b ${
           isLight ? 'border-light-border' : 'border-dark-border'
         }`}>
-          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-md dark:shadow-elite shadow-blue-500/40">
-            <Wallet size={18} weight="fill" className="text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-md dark:shadow-elite shadow-blue-500/40">
+              <Wallet size={18} weight="fill" className="text-white" />
+            </div>
+            <span className={`font-extrabold text-lg tracking-tight ${isLight ? 'text-light-primary' : 'text-white'}`}>
+              Spendly
+            </span>
           </div>
-          <span className={`font-extrabold text-lg tracking-tight ${isLight ? 'text-light-primary' : 'text-white'}`}>
-            Spendly
-          </span>
+          
+          {/* Close button for mobile */}
+          <button
+            className="sm:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <CloseIcon size={20} weight="bold" />
+          </button>
         </div>
 
         {/* Nav */}
@@ -78,7 +102,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <button
                 key={page}
                 id={`nav-${page}`}
-                onClick={() => setCurrentPage(page)}
+                onClick={() => { setCurrentPage(page); setIsMobileMenuOpen(false); }}
                 className={`
                   w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-150 text-left
                   ${isActive
@@ -157,18 +181,31 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* HEADER — mode responsive (white / dark-slate) */}
         <header className={`
-          ${NAV_H} shrink-0 flex items-center px-4 sm:px-5 gap-3 transition-colors duration-300
+          ${NAV_H} shrink-0 flex items-center px-2 sm:px-5 gap-1.5 sm:gap-3 transition-colors duration-300
           ${isLight
             ? 'bg-light-card border-b border-light-border shadow-sm dark:shadow-elite'
             : 'bg-dark border-b border-dark-border shadow-lg dark:shadow-elite'}
         `}>
 
-          {/* Mobile logo */}
+          {/* Mobile Hamburg Menu & Logo */}
           <div className="sm:hidden flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+            <button
+              id="mobile-menu-btn"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+              title="Open menu"
+              className={`p-1.5 rounded-lg border transition-all ${
+                isLight
+                  ? 'text-light-secondary border-light-border bg-gray-50'
+                  : 'text-light-secondary border-dark-border bg-slate-700/50'
+              }`}
+            >
+              <MenuIcon size={18} weight="bold" />
+            </button>
+            <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 ml-1">
               <Wallet size={15} weight="fill" className="text-white" />
             </div>
-            <span className={`font-bold text-sm ${isLight ? 'text-light-primary' : 'text-white'}`}>Spendly</span>
+            <span className={`font-bold text-md ${isLight ? 'text-light-primary' : 'text-white'}`}>Spendly</span>
           </div>
 
           {/* Page label */}
@@ -183,19 +220,20 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <div className="flex-1" />
 
-          {/* Set Budgets — orange accent button */}
+          {/* Set Budgets */}
           {currentPage === 'dashboard' && currentRole === 'Admin' && (
             <button
               id="header-set-budgets"
               onClick={openBudgetModal}
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+              title="Set Budgets"
+              className={`flex items-center gap-1.5 sm:px-3 sm:py-1.5 p-2 text-xs font-semibold rounded-lg border transition-all ${
                 isLight
                   ? 'text-light-secondary bg-light-card border-light-border hover:bg-gray-100 hover:text-light-primary'
                   : 'text-light-secondary bg-dark-card border-dark-border hover:bg-slate-700 hover:text-white'
               }`}
             >
-              <SlidersIcon size={13} />
-              Set Budgets
+              <SlidersIcon size={15} />
+              <span className="hidden sm:inline">Set Budgets</span>
             </button>
           )}
 
@@ -211,7 +249,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 key={role}
                 id={`role-toggle-${role.toLowerCase()}`}
                 onClick={() => handleRoleChange(role)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-[10px] sm:text-xs font-semibold transition-all ${
                   currentRole === role
                     ? 'bg-gray-900 text-white shadow-sm dark:shadow-elite'
                     : isLight
@@ -219,18 +257,19 @@ export function AppLayout({ children }: AppLayoutProps) {
                       : 'text-light-secondary hover:text-gray-100 hover:bg-light-card/5'
                 }`}
               >
-                {role}
+                {role === 'Viewer' ? <span className="sm:hidden">View</span> : <span className="sm:hidden">Edit</span>}
+                <span className="hidden sm:inline">{role}</span>
               </button>
             ))}
           </div>
 
           {/* Currency */}
-          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+          <div className={`flex items-center gap-1 sm:gap-1.5 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border text-[10px] sm:text-xs font-medium transition-all ${
             isLight
               ? 'bg-light-card border-light-border text-light-secondary hover:bg-gray-100'
               : 'bg-dark-card border-dark-border text-light-secondary hover:bg-slate-700'
           }`}>
-            <span className={`text-[9px] font-bold uppercase tracking-widest ${isLight ? 'text-light-secondary' : 'opacity-50'}`}>
+            <span className={`hidden sm:inline text-[9px] font-bold uppercase tracking-widest ${isLight ? 'text-light-secondary' : 'opacity-50'}`}>
               in
             </span>
             <select
@@ -238,7 +277,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               value={currency}
               onChange={e => setCurrency(e.target.value as Currency)}
               aria-label="Currency"
-              className={`bg-transparent border-none outline-none cursor-pointer text-xs font-bold ${
+              className={`bg-transparent border-none outline-none cursor-pointer text-[10px] sm:text-xs font-bold leading-none ${
                 isLight ? 'text-light-primary' : 'text-gray-100'
               }`}
             >
@@ -259,13 +298,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             id="theme-toggle"
             onClick={toggleTheme}
             title="Toggle theme"
-            className={`p-2 rounded-lg border transition-all ${
+            className={`p-1.5 sm:p-2 rounded-lg border transition-all ${
               isLight
                 ? 'text-light-secondary bg-light-card border-light-border hover:bg-gray-100 hover:text-light-primary'
                 : 'text-light-secondary bg-dark-card border-dark-border hover:bg-slate-700 hover:text-white'
             }`}
           >
-            {isLight ? <Moon size={15} /> : <Sun size={15} />}
+            {isLight ? <Moon size={14} className="sm:w-[15px] sm:h-[15px]" /> : <Sun size={14} className="sm:w-[15px] sm:h-[15px]" />}
           </button>
         </header>
 

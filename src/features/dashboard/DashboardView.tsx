@@ -92,8 +92,9 @@ function BreakdownTable({ title, rows, currency, accent, isLight }:
         </span>
       </div>
 
-      <table className="w-full text-sm">
-        <thead>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm whitespace-nowrap">
+          <thead>
           <tr className={`text-xs font-bold uppercase tracking-wide ${hdCls}`}>
             <th className="w-8 px-3 py-2.5" />
             <th className="px-3 py-2.5 text-left">Category</th>
@@ -145,6 +146,7 @@ function BreakdownTable({ title, rows, currency, accent, isLight }:
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
@@ -371,8 +373,8 @@ export function DashboardView() {
             </h3>
             <div className="flex gap-5 items-center">
               {/* Donut chart */}
-              <div className="shrink-0 w-[150px] h-[150px]">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="shrink-0 w-[150px] h-[150px] min-h-[150px] min-w-[150px]">
+                <ResponsiveContainer width="100%" height="auto" aspect={1}>
                   <PieChart>
                     <Pie
                       data={spendingDonut.length > 0 ? spendingDonut : [{ name: 'None', value: 1, fill: isLight ? '#E2E8F0' : '#1e293b' }]}
@@ -466,8 +468,8 @@ export function DashboardView() {
             <h3 className={`text-xs font-bold uppercase tracking-[0.14em] mb-4 ${label}`}>
               Monthly Overview — {selectedYear}
             </h3>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[200px] min-h-[200px] min-w-0">
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
                   <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" stroke="#64748B" fontSize={10} tickLine={false} axisLine={false} dy={8} />
