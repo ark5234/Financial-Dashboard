@@ -16,13 +16,13 @@ import { formatCurrency } from '../../utils/format';
 import { CATEGORY_CONFIG } from '../../utils/categories';
 
 const TYPE_BADGE: Record<string, string> = {
-  income:  'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  expense: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-  savings: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+  income:  'bg-success-soft text-success text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+  expense: 'bg-danger-soft text-danger text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+  savings: 'bg-accent-soft text-accent text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
 };
 
 const AMOUNT_COLOR: Record<string, string> = {
-  income:  'text-emerald-600 dark:text-emerald-400',
+  income:  'text-success dark:text-emerald-400',
   expense: 'text-rose-600 dark:text-rose-400',
   savings: 'text-violet-600 dark:text-violet-400',
 };
@@ -99,9 +99,9 @@ export function TransactionsView() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="flex flex-col sm:flex-row gap-3 bg-light-card dark:bg-dark-card p-4 rounded-xl shadow-sm dark:shadow-elite border border-light-border dark:border-dark-border">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-light-secondary" />
           <input
             id="tx-search"
             type="text"
@@ -109,11 +109,11 @@ export function TransactionsView() {
             aria-label="Search transactions"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-light-bg dark:bg-gray-900 border border-light-border dark:border-dark-border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
           />
         </div>
-        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3">
-          <FilterIcon className="w-4 h-4 text-gray-400 shrink-0" />
+        <div className="flex items-center gap-2 bg-light-bg dark:bg-gray-900 border border-light-border dark:border-dark-border rounded-lg px-3">
+          <FilterIcon className="w-4 h-4 text-light-secondary shrink-0" />
           <select
             id="tx-filter-type"
             value={filterType}
@@ -130,10 +130,10 @@ export function TransactionsView() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="bg-light-card border border-light-border shadow-sm hover:shadow-md transition-shadow dark:border-dark-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-500 dark:bg-gray-800/80 dark:text-gray-400 uppercase text-xs tracking-wider">
+            <thead className="bg-light-bg text-light-secondary dark:bg-dark-card/80 dark:text-light-secondary uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-5 py-3.5 font-semibold">Date</th>
                 <th className="px-5 py-3.5 font-semibold">Description</th>
@@ -146,15 +146,15 @@ export function TransactionsView() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
-                    <td className="px-5 py-3.5 whitespace-nowrap text-gray-500">
+                  <tr key={tx.id} className="hover:bg-light-bg dark: hover:bg-gray-50/50 dark: hover:bg-gray-50/50 dark:hover:bg-slate-800/50-slate-800/50-gray-700/40 transition">
+                    <td className="px-5 py-3.5 whitespace-nowrap text-light-secondary">
                       {format(parseISO(tx.date), 'MMM dd, yyyy')}
                     </td>
                     <td className="px-5 py-3.5">
                       <span className="font-medium">{tx.description}</span>
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${CATEGORY_CONFIG[tx.category]?.color || 'bg-gray-100 text-gray-700'}`}>
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${CATEGORY_CONFIG[tx.category]?.color || 'bg-gray-100 text-light-secondary'}`}>
                         {CATEGORY_CONFIG[tx.category]?.Icon && React.createElement(CATEGORY_CONFIG[tx.category].Icon, { className: 'w-3.5 h-3.5' })}
                         {tx.category}
                       </span>
@@ -185,7 +185,7 @@ export function TransactionsView() {
                               addToast('Transaction deleted', 'error');
                             }
                           }}
-                          className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition"
+                          className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 p-1.5 rounded-lg hover:bg-danger-soft text-danger dark:hover:bg-rose-900/20 transition"
                           title="Delete transaction"
                         >
                           <Trash className="w-4 h-4" />
@@ -196,7 +196,7 @@ export function TransactionsView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={currentRole === 'Admin' ? 6 : 5} className="px-5 py-14 text-center text-gray-400 italic">
+                  <td colSpan={currentRole === 'Admin' ? 6 : 5} className="px-5 py-14 text-center text-light-secondary italic">
                     No transactions found.
                   </td>
                 </tr>
@@ -205,7 +205,7 @@ export function TransactionsView() {
           </table>
         </div>
         {filteredTransactions.length > 0 && (
-          <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400">
+          <div className="px-5 py-3 border-t border-light-border dark:border-dark-border text-xs text-light-secondary">
             Showing {filteredTransactions.length} record{filteredTransactions.length !== 1 ? 's' : ''}
           </div>
         )}

@@ -27,7 +27,7 @@ function Toast({ toast, onDismiss }: { toast: ToastMessage; onDismiss: () => voi
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg p-3 w-72 flex items-center gap-3 border border-gray-100 dark:border-gray-700 animate-in slide-in-from-right-4 pointer-events-auto">
+    <div className="bg-light-card border border-light-border shadow-sm hover:shadow-md transition-shadow dark:border-dark-border animate-in slide-in-from-right-4 pointer-events-auto">
       {icons[toast.type]}
       <span className="flex-1 text-sm font-medium">{toast.msg}</span>
       <button 
@@ -35,7 +35,7 @@ function Toast({ toast, onDismiss }: { toast: ToastMessage; onDismiss: () => voi
         title="Dismiss Notification"
         aria-label="Dismiss Notification"
         onClick={onDismiss} 
-        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        className="text-light-secondary hover:text-light-secondary dark:hover:text-light-secondary"
       >
         <XIcon className="w-4 h-4" />
       </button>

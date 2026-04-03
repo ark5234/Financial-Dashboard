@@ -19,11 +19,11 @@ function pct(tracked: number, budget: number) {
 }
 function pctBarColor(p: number) {
   if (p >= 100) return 'bg-rose-400';
-  if (p >= 80)  return 'bg-amber-400';
+  if (p >= 80)  return 'bg-warning';
   return 'bg-emerald-400';
 }
 function pctTextColor(p: number, type: TransactionType) {
-  if (type === 'income') return p >= 100 ? 'text-emerald-600' : 'text-amber-600';
+  if (type === 'income') return p >= 100 ? 'text-success' : 'text-amber-600';
   if (p >= 100) return 'text-rose-600';
   if (p >= 80)  return 'text-amber-600';
   return 'text-stone-400';
@@ -44,21 +44,21 @@ function KpiCard({ label, value, sub, isLight, topColor, Icon, iconBg, iconColor
     <div className={`
       card-lift rounded-2xl p-6 relative overflow-hidden border-t-4 ${topColor} select-none
       ${isLight
-        ? 'bg-white border border-gray-200 shadow-sm'
-        : 'bg-slate-800 border border-slate-700'}
+        ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
+        : 'bg-dark-card border border-dark-border'}
     `}>
       <div className="flex items-start justify-between mb-4 relative">
-        <p className={`text-xs font-semibold uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+        <p className={`text-xs font-semibold uppercase tracking-widest ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
           {label}
         </p>
         <div className={`p-2 rounded-lg ${isLight ? iconBg : 'bg-slate-700'}`}>
-          <Icon size={14} className={isLight ? iconColor : 'text-slate-400'} weight="bold" />
+          <Icon size={14} className={isLight ? iconColor : 'text-light-secondary'} weight="bold" />
         </div>
       </div>
       <p className={`text-3xl font-bold tabular-nums tracking-tight relative ${
-        valueColor || (isLight ? 'text-gray-900' : 'text-slate-100')
+        valueColor || (isLight ? 'text-light-primary' : 'text-gray-100')
       }`}>{value}</p>
-      {sub && <p className={`text-sm mt-1 relative ${isLight ? 'text-slate-400' : 'text-slate-400'}`}>{sub}</p>}
+      {sub && <p className={`text-sm mt-1 relative ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>{sub}</p>}
       {children}
     </div>
   );
@@ -76,12 +76,12 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
   const totalBudget  = rows.reduce((s, r) => s + r.budget,  0);
 
   const cardCls = isLight
-    ? 'bg-white border border-gray-200 shadow-sm'
-    : 'bg-slate-800 border border-slate-700';
-  const hdCls   = isLight ? 'text-slate-500 bg-gray-50' : 'text-slate-400 bg-slate-900/40';
-  const rowHov  = isLight ? 'hover:bg-amber-50/30' : 'hover:bg-slate-700/20';
+    ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
+    : 'bg-dark-card border border-dark-border';
+  const hdCls   = isLight ? 'text-light-secondary bg-light-bg' : 'text-light-secondary bg-dark/40';
+  const rowHov  = isLight ? 'hover:bg-warning-soft text-warning/30' : 'hover:bg-slate-700/20';
   const divCls  = isLight ? 'divide-gray-100' : 'divide-slate-700/50';
-  const foot    = isLight ? 'bg-gray-50 border-t-2 border-gray-100' : 'bg-slate-900/30 border-t-2 border-slate-600';
+  const foot    = isLight ? 'bg-light-bg border-t-2 border-light-border' : 'bg-dark/30 border-t-2 border-dark-border';
 
   return (
     <div className={`rounded-2xl overflow-hidden ${cardCls}`}>
@@ -109,7 +109,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
         <tbody className={`divide-y ${divCls}`}>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-amber-600/50' : 'text-slate-500'}`}>
+              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-amber-600/50' : 'text-light-secondary'}`}>
                 No data for this period
               </td>
             </tr>
@@ -119,21 +119,21 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
             return (
               <tr key={row.category} className={`transition-colors ${rowHov}`}>
                 <td className="px-3 py-4 text-center">
-                  {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-amber-300' : 'text-slate-500'}`} />}
+                  {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-amber-300' : 'text-light-secondary'}`} />}
                 </td>
-                <td className={`px-3 py-4 font-medium text-sm ${isLight ? 'text-stone-800' : 'text-slate-200'}`}>
+                <td className={`px-3 py-4 font-medium text-sm ${isLight ? 'text-stone-800' : 'text-gray-200'}`}>
                   {row.category}
                 </td>
-                <td className={`px-4 py-4 text-right tabular-nums font-bold text-sm ${isLight ? 'text-stone-900' : 'text-slate-100'}`}>
+                <td className={`px-4 py-4 text-right tabular-nums font-bold text-sm ${isLight ? 'text-stone-900' : 'text-gray-100'}`}>
                   {formatCurrency(row.tracked, currency)}
                 </td>
-                <td className={`px-4 py-4 text-right tabular-nums text-sm ${isLight ? 'text-slate-600' : 'text-slate-500'}`}>
+                <td className={`px-4 py-4 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
                   {row.budget ? formatCurrency(row.budget, currency) : <span className="italic">–</span>}
                 </td>
                 <td className="px-4 py-4">
                   {row.budget > 0 ? (
                     <div className="flex items-center gap-2 min-w-[110px]">
-                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
                         <div className={`${pctBarColor(p)} h-2 rounded-full transition-all`}
                           style={{ width: `${Math.min(p, 100)}%` }} />
                       </div>
@@ -142,7 +142,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
                       </span>
                     </div>
                   ) : (
-                    <span className={`text-xs ${isLight ? 'text-amber-300' : 'text-slate-600'}`}>–</span>
+                    <span className={`text-xs ${isLight ? 'text-amber-300' : 'text-light-secondary'}`}>–</span>
                   )}
                 </td>
               </tr>
@@ -151,13 +151,13 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
           {/* Footer row */}
           <tr className={foot}>
             <td />
-            <td className={`px-3 py-3 text-xs font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+            <td className={`px-3 py-3 text-xs font-bold uppercase tracking-wider ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               Total
             </td>
-            <td className={`px-4 py-3 text-right tabular-nums text-sm font-bold ${isLight ? 'text-gray-900' : 'text-slate-200'}`}>
+            <td className={`px-4 py-3 text-right tabular-nums text-sm font-bold ${isLight ? 'text-light-primary' : 'text-gray-200'}`}>
               {formatCurrency(totalTracked, currency)}
             </td>
-            <td className={`px-4 py-3 text-right tabular-nums text-sm ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+            <td className={`px-4 py-3 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               {formatCurrency(totalBudget, currency)}
             </td>
             <td className="px-4 py-3">
@@ -165,7 +165,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
                 const p = pct(totalTracked, totalBudget);
                 return (
                   <div className="flex items-center gap-2 min-w-[110px]">
-                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
                       <div className={`${pctBarColor(p)} h-2 rounded-full`} style={{ width: `${Math.min(p, 100)}%` }} />
                     </div>
                     <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
@@ -296,11 +296,11 @@ export function DashboardView() {
   }, [transactions, selectedYear]);
 
   // ── Style shortcuts ───────────────────────────────────────────────────────
-  const card      = isLight ? 'bg-white border border-gray-200 shadow-sm rounded-2xl' : 'bg-slate-800 border border-slate-700 rounded-2xl';
-  const label     = isLight ? 'text-slate-500'    : 'text-slate-400';
-  const labelMini = isLight ? 'text-slate-400'    : 'text-slate-500';
-  const heading   = isLight ? 'text-gray-900'     : 'text-slate-100';
-  const gridLine  = isLight ? '#e2e8f0'           : '#334155';
+  const card      = isLight ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite rounded-2xl' : 'bg-dark-card border border-dark-border rounded-2xl';
+  const label     = isLight ? 'text-light-secondary'    : 'text-light-secondary';
+  const labelMini = isLight ? 'text-light-secondary'    : 'text-light-secondary';
+  const heading   = isLight ? 'text-light-primary'     : 'text-gray-100';
+  
 
   return (
     <div className="space-y-6">
@@ -323,11 +323,11 @@ export function DashboardView() {
           isLight={isLight}
           topColor={netBalance >= 0 ? 'border-t-emerald-500' : 'border-t-rose-500'}
           Icon={netBalance >= 0 ? TrendUpIcon : ArrowDownIcon}
-          iconBg={netBalance >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}
-          iconColor={netBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}
+          iconBg={netBalance >= 0 ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}
+          iconColor={netBalance >= 0 ? 'text-success' : 'text-rose-600'}
           valueColor={
             netBalance >= 0
-              ? (isLight ? 'text-emerald-600' : 'text-emerald-400')
+              ? (isLight ? 'text-success' : 'text-emerald-400')
               : (isLight ? 'text-rose-600'    : 'text-rose-400')
           }
         />
@@ -338,13 +338,13 @@ export function DashboardView() {
           isLight={isLight}
           topColor="border-t-amber-500"
           Icon={PiggyBankIcon}
-          iconBg="bg-amber-50"
+          iconBg="bg-warning-soft text-warning"
           iconColor="text-amber-600"
           valueColor={isLight ? 'text-amber-700' : 'text-amber-400'}
         >
-          <div className={`w-full rounded-full h-2 mt-3 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+          <div className={`w-full rounded-full h-2 mt-3 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
             <div
-              className="bg-amber-500 h-2 rounded-full transition-all"
+              className="bg-warning h-2 rounded-full transition-all"
               style={{ width: `${Math.min(100, parseFloat(savingsRate))}%` }}
             />
           </div>
@@ -357,11 +357,11 @@ export function DashboardView() {
           isLight={isLight}
           topColor={incomeTrackedPct >= 100 ? 'border-t-emerald-500' : 'border-t-amber-400'}
           Icon={ArrowUpIcon}
-          iconBg={incomeTrackedPct >= 100 ? 'bg-emerald-50' : 'bg-amber-50'}
-          iconColor={incomeTrackedPct >= 100 ? 'text-emerald-600' : 'text-amber-600'}
+          iconBg={incomeTrackedPct >= 100 ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'}
+          iconColor={incomeTrackedPct >= 100 ? 'text-success' : 'text-amber-600'}
           valueColor={
             incomeTrackedPct >= 100
-              ? (isLight ? 'text-emerald-600' : 'text-emerald-400')
+              ? (isLight ? 'text-success' : 'text-emerald-400')
               : (isLight ? 'text-amber-700'   : 'text-amber-400')
           }
         />
@@ -375,9 +375,9 @@ export function DashboardView() {
           <p className={`text-xs font-bold uppercase tracking-[0.14em] ${label}`}>
             Breakdown — {MONTHS[selectedMonth].slice(0, 3)} {selectedYear}
           </p>
-          <BreakdownTable title="Income"   type="income"  accent="bg-emerald-600" rows={incomeRows}  currency={currency} isLight={isLight} />
-          <BreakdownTable title="Expenses" type="expense" accent="bg-rose-500"    rows={expenseRows} currency={currency} isLight={isLight} />
-          <BreakdownTable title="Savings"  type="savings" accent="bg-amber-500"   rows={savingsRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Income"   type="income"  accent="bg-success" rows={incomeRows}  currency={currency} isLight={isLight} />
+          <BreakdownTable title="Expenses" type="expense" accent="bg-danger"    rows={expenseRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Savings"  type="savings" accent="bg-warning"   rows={savingsRows} currency={currency} isLight={isLight} />
         </div>
 
         {/* RIGHT: Charts */}
@@ -424,14 +424,14 @@ export function DashboardView() {
                   <div key={item.name} className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
-                      <span className={`text-xs truncate ${isLight ? 'text-stone-600' : 'text-slate-400'}`}>{item.name}</span>
+                      <span className={`text-xs truncate ${isLight ? 'text-stone-600' : 'text-light-secondary'}`}>{item.name}</span>
                     </div>
-                    <span className={`text-xs font-bold tabular-nums shrink-0 ${isLight ? 'text-stone-900' : 'text-slate-200'}`}>
+                    <span className={`text-xs font-bold tabular-nums shrink-0 ${isLight ? 'text-stone-900' : 'text-gray-200'}`}>
                       {formatCurrency(item.value, currency)}
                     </span>
                   </div>
                 ))}
-                <div className={`pt-2 mt-1 border-t ${isLight ? 'border-amber-100' : 'border-slate-700'} flex items-center justify-between`}>
+                <div className={`pt-2 mt-1 border-t ${isLight ? 'border-amber-100' : 'border-dark-border'} flex items-center justify-between`}>
                   <span className={`text-xs font-bold ${label}`}>Total Expenses</span>
                   <span className={`text-xs font-bold tabular-nums ${isLight ? 'text-rose-600' : 'text-rose-400'}`}>
                     {formatCurrency(periodExpenses, currency)}
@@ -456,7 +456,7 @@ export function DashboardView() {
                   <div key={row.name}>
                     {/* Label row */}
                     <div className="flex items-center justify-between gap-3 mb-1.5">
-                      <span className={`text-xs font-semibold truncate min-w-0 ${isLight ? 'text-stone-700' : 'text-slate-300'}`}>
+                      <span className={`text-xs font-semibold truncate min-w-0 ${isLight ? 'text-stone-700' : 'text-light-secondary'}`}>
                         {row.name}
                       </span>
                       <div className="flex items-center gap-3 shrink-0">
@@ -464,12 +464,12 @@ export function DashboardView() {
                           {formatCurrency(row.tracked, currency)} / {formatCurrency(row.budget, currency)}
                         </span>
                         <span className={`text-xs font-bold tabular-nums w-10 text-right ${
-                          row.p >= 100 ? 'text-rose-600' : row.p >= 80 ? 'text-amber-600' : 'text-emerald-600'
+                          row.p >= 100 ? 'text-rose-600' : row.p >= 80 ? 'text-amber-600' : 'text-success'
                         }`}>{row.p}%</span>
                       </div>
                     </div>
                     {/* Bar */}
-                    <div className={`w-full rounded-full h-2 ${isLight ? 'bg-amber-100' : 'bg-slate-700'}`}>
+                    <div className={`w-full rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
                       <div
                         className={`${pctBarColor(row.p)} h-2 rounded-full transition-all duration-500`}
                         style={{ width: `${Math.min(row.p, 100)}%` }}
@@ -489,15 +489,15 @@ export function DashboardView() {
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridLine} opacity={0.6} />
+                  <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" stroke="#92400e" fontSize={10} tickLine={false} axisLine={false} dy={8} />
                   <YAxis stroke="#92400e" fontSize={10} tickLine={false} axisLine={false}
                     tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
                   <Tooltip contentStyle={TT_STYLE} cursor={{ fill: 'rgba(245,158,11,0.05)' }}
                     formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''} />
-                  <Bar dataKey="income"   name="Income"   fill="#10b981" radius={[3,3,0,0]} maxBarSize={16} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#f43f5e" radius={[3,3,0,0]} maxBarSize={16} />
-                  <Bar dataKey="savings"  name="Savings"  fill="#f59e0b" radius={[3,3,0,0]} maxBarSize={16} />
+                  <Bar dataKey="income"   name="Income"   fill="#16A34A" maxBarSize={16} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="expenses" name="Expenses" fill="#DC2626" maxBarSize={16} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="savings"  name="Savings"  fill="#D97706" maxBarSize={16} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

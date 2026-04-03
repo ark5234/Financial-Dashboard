@@ -1,16 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #2563EB;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-accent: #7C3AED;
+  --color-success-soft: #DCFCE7;
+  --color-danger-soft: #FEE2E2;
+  --color-warning-soft: #FEF3C7;
+  --color-primary-soft: #DBEAFE;
+  --color-accent-soft: #F3E8FF;
+  --color-light-bg: #f9fafb;
+  --color-light-card: #ffffff;
+  --color-light-border: #e5e7eb;
+  --color-light-primary: #111827;
+  --color-light-secondary: #4B5563;
+  --color-light-muted: #9CA3AF;
+  --color-dark: #0B0B0B;
+  --color-dark-card: #151515;
+  --color-dark-border: rgba(255, 255, 255, 0.05);
+}
+
+@utility shadow-elite {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 10px 30px rgba(0, 0, 0, 0.6);
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Card hover lift — amber glow ── */
 .card-lift {
   transition: box-shadow 0.22s ease, transform 0.22s ease;
 }
@@ -22,5 +45,4 @@ html, body {
   box-shadow: 0 12px 28px -6px rgba(245, 158, 11, 0.10), 0 4px 10px -4px rgba(245, 158, 11, 0.06);
 }
 
-/* Recharts font */
-.recharts-text { font-family: 'Inter', sans-serif !important; }
+.recharts-text { font-family: "Inter", sans-serif !important; }

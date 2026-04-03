@@ -21,5 +21,5 @@ export const CATEGORY_CONFIG: Record<string, { color: string; fill: string; Icon
   'Emergency Fund': { color: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/40 dark:text-fuchsia-300', fill: '#d946ef', Icon: PiggyBank },
   'Retirement':     { color: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',     fill: '#7c3aed', Icon: Vault },
   'Stock Portfolio':{ color: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',                 fill: '#0ea5e9', Icon: ChartLineUp },
-  'Sinking Fund':   { color: 'bg-slate-100 text-slate-800 dark:bg-slate-700/60 dark:text-slate-300',         fill: '#64748b', Icon: Archive },
+  'Sinking Fund':   { color: 'bg-slate-100 text-light-primary dark:bg-slate-700/60 dark:text-light-muted',         fill: '#64748b', Icon: Archive },
 };

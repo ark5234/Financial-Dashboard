@@ -9,17 +9,17 @@ interface BudgetModalProps { onClose: () => void; }
 const SECTIONS: { type: TransactionType; label: string; bg: string; light: string; categories: string[] }[] = [
   {
     type: 'income', label: 'Income',
-    bg: 'bg-emerald-500', light: 'bg-emerald-50 border-emerald-200',
+    bg: 'bg-success', light: 'bg-success-soft text-success ',
     categories: ['Salary', 'Freelance', 'Investment'],
   },
   {
     type: 'expense', label: 'Expenses',
-    bg: 'bg-rose-500', light: 'bg-rose-50 border-rose-200',
+    bg: 'bg-danger', light: 'bg-danger-soft text-danger ',
     categories: ['Housing', 'Utilities', 'Groceries', 'Transport', 'Entertainment', 'Dining', 'Health'],
   },
   {
     type: 'savings', label: 'Savings',
-    bg: 'bg-violet-600', light: 'bg-violet-50 border-violet-200',
+    bg: 'bg-accent', light: 'bg-accent-soft text-accent ',
     categories: ['Emergency Fund', 'Retirement', 'Stock Portfolio', 'Sinking Fund'],
   },
 ];
@@ -81,16 +81,16 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="flex min-h-full items-start sm:items-center justify-center p-3 sm:p-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg my-4 flex flex-col">
+        <div className="bg-light-card dark:bg-dark-card rounded-2xl shadow-2xl w-full max-w-lg my-4 flex flex-col">
 
           {/* ── Modal Header ─────────────────────────────────────────────── */}
-          <div className="sticky top-0 bg-white dark:bg-slate-800 rounded-t-2xl z-10 flex items-start justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-slate-700">
+          <div className="sticky top-0 bg-light-card dark:bg-dark-card rounded-t-2xl z-10 flex items-start justify-between px-6 pt-5 pb-4 border-b border-light-border dark:border-dark-border">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Monthly Budget Targets</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Set how much you plan to earn, spend, and save each month</p>
+              <h2 className="text-lg font-bold text-light-primary dark:text-white">Monthly Budget Targets</h2>
+              <p className="text-xs text-light-secondary mt-0.5">Set how much you plan to earn, spend, and save each month</p>
             </div>
             <button aria-label="Close" onClick={onClose}
-              className="mt-0.5 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 transition shrink-0">
+              className="mt-0.5 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-light-secondary transition shrink-0">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -98,15 +98,15 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
           {/* ── Allocation Health Bar ─────────────────────────────────────── */}
           <div className={`mx-6 mt-5 rounded-xl border-2 p-4 ${
             isOver
-              ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-300 dark:border-rose-700'
+              ? 'bg-danger-soft text-danger dark:bg-rose-900/20 border-rose-300 dark:border-rose-700'
               : isBalanced
-              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700'
-              : 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'
+              ? 'bg-success-soft text-success dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700'
+              : 'bg-warning-soft text-warning dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'
           }`}>
             {/* Row 1: Income / Expenses / Savings */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="text-center">
-                <div className="flex items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400 mb-0.5">
+                <div className="flex items-center justify-center gap-1 text-success dark:text-emerald-400 mb-0.5">
                   <ArrowUpIcon size={11} weight="bold" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">Income</span>
                 </div>
@@ -132,7 +132,7 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
             <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2 mb-2 overflow-hidden">
               {totalIncome > 0 && (
                 <div
-                  className={`h-2 rounded-full transition-all duration-300 ${isOver ? 'bg-rose-500' : isBalanced ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${isOver ? 'bg-danger' : isBalanced ? 'bg-success' : 'bg-warning'}`}
                   style={{ width: `${Math.min(pctAllocated, 100)}%` }}
                 />
               )}
@@ -140,11 +140,11 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
 
             {/* Row 2: Remaining label */}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-light-secondary dark:text-light-secondary">
                 {pctAllocated}% of income allocated
               </span>
               <span className={`text-sm font-extrabold tabular-nums ${
-                isOver ? 'text-rose-600 dark:text-rose-400' : isBalanced ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                isOver ? 'text-rose-600 dark:text-rose-400' : isBalanced ? 'text-success dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
               }`}>
                 {isOver
                   ? `⚠ Over by ${formatCurrency(Math.abs(moneyLeft), currency)}`
@@ -176,11 +176,11 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
                     return (
                       <div key={cat} className="flex items-center gap-3">
                         <label htmlFor={`budget-${type}-${cat}`}
-                          className="flex-1 text-sm font-semibold text-gray-700 dark:text-gray-200 truncate">
+                          className="flex-1 text-sm font-semibold text-light-secondary dark:text-gray-200 truncate">
                           {cat}
                         </label>
                         <div className="relative w-36 shrink-0">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none select-none">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-light-secondary text-sm pointer-events-none select-none">
                             {sym}
                           </span>
                           <input
@@ -191,8 +191,8 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
                             placeholder="0"
                             className={`w-full pl-7 pr-3 py-2 text-sm rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums text-right transition border ${
                               hasValue
-                                ? `${light} dark:bg-slate-700 dark:border-slate-500 font-semibold text-gray-800 dark:text-gray-100`
-                                : 'border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900 text-gray-400'
+                                ? `${light} dark:bg-slate-700 dark:border-slate-500 font-semibold text-light-primary dark:text-gray-100`
+                                : 'border-light-border dark:border-dark-border bg-light-bg dark:bg-dark text-light-secondary'
                             }`}
                             aria-label={`Budget for ${cat}`}
                           />
@@ -206,15 +206,15 @@ export function BudgetModal({ onClose }: BudgetModalProps) {
           </div>
 
           {/* ── Sticky Footer ─────────────────────────────────────────────── */}
-          <div className="sticky bottom-0 bg-white dark:bg-slate-800 rounded-b-2xl px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3">
-            <p className="text-xs text-gray-400 hidden sm:block">Changes apply to all periods until updated</p>
+          <div className="sticky bottom-0 bg-light-card dark:bg-dark-card rounded-b-2xl px-6 py-4 border-t border-light-border dark:border-dark-border flex items-center justify-between gap-3">
+            <p className="text-xs text-light-secondary hidden sm:block">Changes apply to all periods until updated</p>
             <div className="flex gap-2 shrink-0 ml-auto">
               <button onClick={onClose}
-                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition border border-gray-200 dark:border-slate-600">
+                className="px-4 py-2 text-sm font-semibold text-light-secondary dark:text-light-secondary hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition border border-light-border dark:border-dark-border">
                 Cancel
               </button>
               <button onClick={handleSave}
-                className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-lg shadow-indigo-500/25 transition">
+                className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-lg dark:shadow-elite shadow-indigo-500/25 transition">
                 Save Budgets
               </button>
             </div>

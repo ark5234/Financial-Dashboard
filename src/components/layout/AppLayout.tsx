@@ -42,25 +42,25 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   return (
-    <div className={`min-h-screen flex transition-colors duration-300 ${isLight ? 'bg-slate-50' : 'bg-slate-900'}`}>
+    <div className={`min-h-screen flex transition-colors duration-300 ${isLight ? 'bg-light-bg' : 'bg-dark'}`}>
 
       {/* ────────────────────── SIDEBAR ────────────────────────────────── */}
       <aside
         className={`${SIDE_W} hidden sm:flex flex-col shrink-0 transition-colors duration-300 ${
           isLight
-            ? 'bg-white border-r border-gray-200'
-            : 'bg-slate-900 border-r border-white/10'
+            ? 'bg-light-card border-r border-light-border'
+            : 'bg-dark border-r border-dark-border'
         }`}
         style={!isLight ? { boxShadow: '4px 0 24px rgba(0,0,0,0.35)' } : undefined}
       >
         {/* Logo */}
         <div className={`${NAV_H} px-4 flex items-center gap-3 shrink-0 border-b ${
-          isLight ? 'border-gray-100' : 'border-white/10'
+          isLight ? 'border-light-border' : 'border-dark-border'
         }`}>
-          <div className="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0 shadow-md shadow-amber-400/40">
+          <div className="w-8 h-8 rounded-xl bg-warning flex items-center justify-center shrink-0 shadow-md dark:shadow-elite shadow-amber-400/40">
             <Wallet size={18} weight="fill" className="text-white" />
           </div>
-          <span className={`font-extrabold text-lg tracking-tight ${isLight ? 'text-gray-900' : 'text-white'}`}>
+          <span className={`font-extrabold text-lg tracking-tight ${isLight ? 'text-light-primary' : 'text-white'}`}>
             Spendly
           </span>
         </div>
@@ -68,7 +68,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Nav */}
         <nav className="px-2 pt-4 pb-2 space-y-0.5">
           <p className={`text-[10px] font-bold uppercase tracking-[0.14em] px-3 pb-1.5 ${
-            isLight ? 'text-slate-400' : 'text-slate-500'
+            isLight ? 'text-light-secondary' : 'text-light-secondary'
           }`}>
             Navigation
           </p>
@@ -83,11 +83,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                   w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-150 text-left
                   ${isActive
                     ? isLight
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'bg-white/10 text-white'
+                      ? 'bg-gray-100 text-light-primary'
+                      : 'bg-light-card/10 text-white'
                     : isLight
-                      ? 'text-slate-500 hover:text-gray-900 hover:bg-gray-100'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'}
+                      ? 'text-light-secondary hover:text-light-primary hover:bg-gray-100'
+                      : 'text-light-secondary hover:text-gray-100 hover:bg-light-card/5'}
                 `}
               >
                 <Icon size={17} weight={isActive ? 'fill' : 'regular'} className="shrink-0" />
@@ -95,8 +95,8 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <p className="text-sm font-semibold leading-tight truncate">{label}</p>
                   <p className={`text-[10px] leading-tight mt-0.5 ${
                     isActive
-                      ? isLight ? 'text-slate-500' : 'text-slate-400'
-                      : isLight ? 'text-slate-400' : 'text-slate-500'
+                      ? isLight ? 'text-light-secondary' : 'text-light-secondary'
+                      : isLight ? 'text-light-secondary' : 'text-light-secondary'
                   }`}>{sub}</p>
                 </div>
               </button>
@@ -104,12 +104,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           })}
         </nav>
 
-        <div className={`mx-3 border-t my-2 ${isLight ? 'border-gray-100' : 'border-white/5'}`} />
+        <div className={`mx-3 border-t my-2 ${isLight ? 'border-light-border' : 'border-dark-border'}`} />
 
         {/* Period Selector */}
         <div className="px-3">
           <p className={`text-[10px] font-bold uppercase tracking-[0.14em] mb-2 ${
-            isLight ? 'text-slate-400' : 'text-slate-500'
+            isLight ? 'text-light-secondary' : 'text-light-secondary'
           }`}>
             View Period
           </p>
@@ -126,8 +126,8 @@ export function AppLayout({ children }: AppLayoutProps) {
                 aria-label={sel.id}
                 className={`w-full appearance-none rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer transition ${
                   isLight
-                    ? 'bg-gray-50 border border-gray-200 text-gray-700 hover:border-gray-300'
-                    : 'bg-slate-700/70 border border-slate-600/60 text-white'
+                    ? 'bg-light-bg border border-light-border text-light-secondary hover:border-light-border'
+                    : 'bg-slate-700/70 border border-dark-border/60 text-white'
                 }`}
               >
                 {sel.options.map(o => (
@@ -145,8 +145,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         <div className="flex-1" />
-        <div className={`px-4 py-3 border-t ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
-          <p className={`text-[10px] text-center ${isLight ? 'text-slate-300' : 'text-slate-600'}`}>
+        <div className={`px-4 py-3 border-t ${isLight ? 'border-light-border' : 'border-dark-border'}`}>
+          <p className={`text-[10px] text-center ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
             All data stored locally
           </p>
         </div>
@@ -159,24 +159,24 @@ export function AppLayout({ children }: AppLayoutProps) {
         <header className={`
           ${NAV_H} shrink-0 flex items-center px-4 sm:px-5 gap-3 transition-colors duration-300
           ${isLight
-            ? 'bg-white border-b border-gray-200 shadow-sm'
-            : 'bg-slate-900 border-b border-white/10 shadow-lg'}
+            ? 'bg-light-card border-b border-light-border shadow-sm dark:shadow-elite'
+            : 'bg-dark border-b border-dark-border shadow-lg dark:shadow-elite'}
         `}>
 
           {/* Mobile logo */}
           <div className="sm:hidden flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-xl bg-warning flex items-center justify-center shrink-0">
               <Wallet size={15} weight="fill" className="text-white" />
             </div>
-            <span className={`font-bold text-sm ${isLight ? 'text-gray-900' : 'text-white'}`}>Spendly</span>
+            <span className={`font-bold text-sm ${isLight ? 'text-light-primary' : 'text-white'}`}>Spendly</span>
           </div>
 
           {/* Page label */}
           <div className="hidden sm:block">
-            <p className={`font-bold text-sm leading-none ${isLight ? 'text-gray-900' : 'text-slate-100'}`}>
+            <p className={`font-bold text-sm leading-none ${isLight ? 'text-light-primary' : 'text-gray-100'}`}>
               {activeNav?.label}
             </p>
-            <p className={`text-[10px] mt-0.5 ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className={`text-[10px] mt-0.5 ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               {activeNav?.sub}
             </p>
           </div>
@@ -190,8 +190,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               onClick={openBudgetModal}
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                 isLight
-                  ? 'text-gray-600 bg-white border-gray-200 hover:bg-gray-100 hover:text-gray-900'
-                  : 'text-slate-300 bg-slate-800 border-slate-600 hover:bg-slate-700 hover:text-white'
+                  ? 'text-light-secondary bg-light-card border-light-border hover:bg-gray-100 hover:text-light-primary'
+                  : 'text-light-secondary bg-dark-card border-dark-border hover:bg-slate-700 hover:text-white'
               }`}
             >
               <SlidersIcon size={13} />
@@ -202,7 +202,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Access Mode toggle */}
           <div
             className={`flex p-0.5 rounded-lg border ${
-              isLight ? 'bg-gray-100 border-gray-200' : 'bg-slate-800 border-slate-700'
+              isLight ? 'bg-gray-100 border-light-border' : 'bg-dark-card border-dark-border'
             }`}
             role="group" aria-label="Access mode"
           >
@@ -213,10 +213,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                 onClick={() => handleRoleChange(role)}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   currentRole === role
-                    ? 'bg-gray-900 text-white shadow-sm'
+                    ? 'bg-gray-900 text-white shadow-sm dark:shadow-elite'
                     : isLight
-                      ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
+                      ? 'text-light-secondary hover:text-light-primary hover:bg-gray-200'
+                      : 'text-light-secondary hover:text-gray-100 hover:bg-light-card/5'
                 }`}
               >
                 {role}
@@ -227,10 +227,10 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Currency */}
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
             isLight
-              ? 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
-              : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+              ? 'bg-light-card border-light-border text-light-secondary hover:bg-gray-100'
+              : 'bg-dark-card border-dark-border text-light-secondary hover:bg-slate-700'
           }`}>
-            <span className={`text-[9px] font-bold uppercase tracking-widest ${isLight ? 'text-slate-400' : 'opacity-50'}`}>
+            <span className={`text-[9px] font-bold uppercase tracking-widest ${isLight ? 'text-light-secondary' : 'opacity-50'}`}>
               in
             </span>
             <select
@@ -239,7 +239,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               onChange={e => setCurrency(e.target.value as Currency)}
               aria-label="Currency"
               className={`bg-transparent border-none outline-none cursor-pointer text-xs font-bold ${
-                isLight ? 'text-gray-900' : 'text-slate-100'
+                isLight ? 'text-light-primary' : 'text-gray-100'
               }`}
             >
               {(['USD','EUR','GBP','INR','JPY'] as Currency[]).map(c => (
@@ -261,8 +261,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             title="Toggle theme"
             className={`p-2 rounded-lg border transition-all ${
               isLight
-                ? 'text-slate-500 bg-white border-gray-200 hover:bg-gray-100 hover:text-gray-900'
-                : 'text-slate-400 bg-slate-800 border-slate-700 hover:bg-slate-700 hover:text-white'
+                ? 'text-light-secondary bg-light-card border-light-border hover:bg-gray-100 hover:text-light-primary'
+                : 'text-light-secondary bg-dark-card border-dark-border hover:bg-slate-700 hover:text-white'
             }`}
           >
             {isLight ? <Moon size={15} /> : <Sun size={15} />}
@@ -271,7 +271,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* PAGE CONTENT */}
         <main className={`flex-1 overflow-auto p-5 sm:p-7 lg:p-8 ${
-          isLight ? 'bg-slate-50' : 'bg-slate-900'
+          isLight ? 'bg-light-bg' : 'bg-dark'
         }`}>
           <div className="max-w-7xl mx-auto">
             {children}
@@ -282,8 +282,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         <footer className={`
           shrink-0 py-3 flex items-center justify-between px-5 text-[11px] border-t transition-colors duration-300
           ${isLight
-            ? 'bg-white border-gray-200 text-slate-400'
-            : 'bg-slate-900 border-white/10 text-slate-500'}
+            ? 'bg-light-card border-light-border text-light-secondary'
+            : 'bg-dark border-dark-border text-light-secondary'}
         `}>
           <span className="font-medium">Spendly · Personal Finance Dashboard</span>
           <span className="hidden sm:block">All data stored locally · Built with React &amp; Recharts</span>
