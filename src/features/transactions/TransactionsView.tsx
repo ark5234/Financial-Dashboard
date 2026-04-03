@@ -76,7 +76,7 @@ export function TransactionsView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold">All Transactions</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">All Transactions</h2>
         <div className="flex items-center gap-2">
           {currentRole === 'Admin' && (
             <button

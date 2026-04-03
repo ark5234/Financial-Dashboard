@@ -60,7 +60,7 @@ export function BudgetPlanningView() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Budget Planning</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Budget Planning</h1>
         <p className="text-sm text-light-secondary mt-0.5">
           Annual plan for {selectedYear} · Change year from the sidebar ·{' '}
           {currentRole === 'Admin'
