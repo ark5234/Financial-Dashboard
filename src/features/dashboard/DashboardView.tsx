@@ -92,8 +92,8 @@ function BreakdownTable({ title, rows, currency, accent, isLight }:
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm whitespace-nowrap">
+      <div className="overflow-x-auto pb-2">
+        <table className="min-w-full text-sm whitespace-nowrap">
           <thead>
           <tr className={`text-xs font-bold uppercase tracking-wide ${hdCls}`}>
             <th className="w-8 px-3 py-2.5" />

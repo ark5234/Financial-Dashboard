@@ -90,8 +90,8 @@ export function BudgetPlanningView() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm whitespace-nowrap">
+            <div className="overflow-x-auto pb-2">
+              <table className="min-w-full text-sm whitespace-nowrap">
                 <thead className="bg-light-bg dark:bg-dark/60 text-xs text-light-secondary dark:text-gray-400 uppercase tracking-wider border-b border-light-border dark:border-dark-border">
                   <tr>
                     <th className="sticky left-0 top-0 z-30 bg-light-bg dark:bg-dark-card px-4 py-2.5 text-left min-w-[160px] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">Category</th>

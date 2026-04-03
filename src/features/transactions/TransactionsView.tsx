@@ -138,8 +138,8 @@ export function TransactionsView() {
       <div className={`border shadow-sm hover:shadow-md transition-all overflow-hidden ${
         isLight ? 'bg-light-card border-light-border' : 'bg-dark-card border-dark-border dark:shadow-elite'
       }`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+        <div className="overflow-x-auto pb-2">
+          <table className="min-w-full text-left text-sm whitespace-nowrap">
             <thead className={`uppercase text-xs tracking-wider ${
               isLight ? 'bg-light-bg text-light-secondary' : 'bg-dark bg-opacity-40 text-gray-400'
             }`}>

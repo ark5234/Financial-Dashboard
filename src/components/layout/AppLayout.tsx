@@ -50,7 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* ────────────────────── OVERLAY FOR MOBILE SIDEBAR ────────────────── */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 sm:hidden transition-opacity touch-none"
+          className="fixed inset-0 z-40 bg-black/50 sm:hidden transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
