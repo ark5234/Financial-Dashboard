@@ -32,7 +32,8 @@ const AMOUNT_PREFIX: Record<string, string> = {
 };
 
 export function TransactionsView() {
-  const { transactions, currentRole, deleteTransaction, currency, addToast } = useStore();
+  const { transactions, currentRole, deleteTransaction, currency, addToast, theme } = useStore();
+  const isLight = theme === 'light';
   const [searchTerm, setSearchTerm]   = useState('');
   const [filterType, setFilterType]   = useState<'all' | 'income' | 'expense' | 'savings'>('all');
   const [isFormOpen, setIsFormOpen]   = useState(false);
@@ -99,7 +100,7 @@ export function TransactionsView() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-light-card dark:bg-dark-card p-4 rounded-xl shadow-sm dark:shadow-elite border border-light-border dark:border-dark-border">
+      <div className={`flex flex-col sm:flex-row gap-3 p-4 rounded-xl shadow-sm border ${isLight ? 'bg-light-card border-light-border' : 'bg-dark-card border-dark-border dark:shadow-elite'}`}>
         <div className="relative flex-1">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-light-secondary" />
           <input
@@ -109,31 +110,39 @@ export function TransactionsView() {
             aria-label="Search transactions"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-light-bg dark:bg-gray-900 border border-light-border dark:border-dark-border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-colors ${
+              isLight 
+                ? 'bg-light-bg border-light-border text-light-primary' 
+                : 'bg-dark bg-opacity-50 border-dark-border text-gray-100 placeholder-gray-500'
+            }`}
           />
         </div>
-        <div className="flex items-center gap-2 bg-light-bg dark:bg-gray-900 border border-light-border dark:border-dark-border rounded-lg px-3">
-          <FilterIcon className="w-4 h-4 text-light-secondary shrink-0" />
+        <div className={`flex items-center gap-2 border rounded-lg px-3 transition-colors ${isLight ? 'bg-light-bg border-light-border' : 'bg-dark bg-opacity-50 border-dark-border'}`}>
+          <FilterIcon className={`w-4 h-4 shrink-0 ${isLight ? 'text-light-secondary' : 'text-gray-400'}`} />
           <select
             id="tx-filter-type"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-            className="bg-transparent border-none py-2 text-sm outline-none cursor-pointer"
+            className={`bg-transparent border-none py-2 text-sm outline-none cursor-pointer ${isLight ? 'text-light-primary' : 'text-gray-200'}`}
             aria-label="Filter by type"
           >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expenses</option>
-            <option value="savings">Savings</option>
+            <option className={isLight ? 'bg-white text-light-primary' : 'bg-dark-card text-gray-200'} value="all">All Types</option>
+            <option className={isLight ? 'bg-white text-light-primary' : 'bg-dark-card text-gray-200'} value="income">Income</option>
+            <option className={isLight ? 'bg-white text-light-primary' : 'bg-dark-card text-gray-200'} value="expense">Expenses</option>
+            <option className={isLight ? 'bg-white text-light-primary' : 'bg-dark-card text-gray-200'} value="savings">Savings</option>
           </select>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-light-card border border-light-border shadow-sm hover:shadow-md transition-shadow dark:border-dark-border overflow-hidden">
+      <div className={`border shadow-sm hover:shadow-md transition-all overflow-hidden ${
+        isLight ? 'bg-light-card border-light-border' : 'bg-dark-card border-dark-border dark:shadow-elite'
+      }`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-light-bg text-light-secondary dark:bg-dark-card/80 dark:text-light-secondary uppercase text-xs tracking-wider">
+            <thead className={`uppercase text-xs tracking-wider ${
+              isLight ? 'bg-light-bg text-light-secondary' : 'bg-dark bg-opacity-40 text-gray-400'
+            }`}>
               <tr>
                 <th className="px-5 py-3.5 font-semibold">Date</th>
                 <th className="px-5 py-3.5 font-semibold">Description</th>
@@ -143,14 +152,14 @@ export function TransactionsView() {
                 {currentRole === 'Admin' && <th className="px-5 py-3.5 font-semibold text-right">Actions</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+            <tbody className={`divide-y ${isLight ? 'divide-gray-100' : 'divide-dark-border'}`}>
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-light-bg dark: hover:bg-gray-50/50 dark: hover:bg-gray-50/50 dark:hover:bg-slate-800/50-slate-800/50-gray-700/40 transition">
-                    <td className="px-5 py-3.5 whitespace-nowrap text-light-secondary">
+                  <tr key={tx.id} className={`transition-colors duration-150 ${isLight ? 'hover:bg-gray-50/70' : 'hover:bg-slate-700/30'}`}>
+                    <td className={`px-5 py-3.5 whitespace-nowrap ${isLight ? 'text-light-secondary' : 'text-gray-200'}`}>
                       {format(parseISO(tx.date), 'MMM dd, yyyy')}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className={`px-5 py-3.5 ${isLight ? 'text-light-primary' : 'text-gray-100'}`}>
                       <span className="font-medium">{tx.description}</span>
                     </td>
                     <td className="px-5 py-3.5">
@@ -173,7 +182,7 @@ export function TransactionsView() {
                       <td className="px-5 py-3.5 text-right whitespace-nowrap">
                         <button
                           onClick={() => handleEdit(tx)}
-                          className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
+                          className={`p-1.5 rounded-lg transition ${isLight ? 'text-blue-500 hover:text-blue-700 hover:bg-blue-50' : 'text-blue-400 hover:text-blue-300 hover:bg-blue-900/40'}`}
                           title="Edit transaction"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -185,7 +194,7 @@ export function TransactionsView() {
                               addToast('Transaction deleted', 'error');
                             }
                           }}
-                          className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-300 p-1.5 rounded-lg hover:bg-danger-soft text-danger dark:hover:bg-rose-900/20 transition"
+                          className={`p-1.5 rounded-lg transition ${isLight ? 'text-rose-500 hover:text-danger hover:bg-danger-soft' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-900/40'}`}
                           title="Delete transaction"
                         >
                           <Trash className="w-4 h-4" />
@@ -196,7 +205,7 @@ export function TransactionsView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={currentRole === 'Admin' ? 6 : 5} className="px-5 py-14 text-center text-light-secondary italic">
+                  <td colSpan={currentRole === 'Admin' ? 6 : 5} className={`px-5 py-14 text-center italic ${isLight ? 'text-light-secondary' : 'text-gray-400'}`}>
                     No transactions found.
                   </td>
                 </tr>
@@ -205,7 +214,7 @@ export function TransactionsView() {
           </table>
         </div>
         {filteredTransactions.length > 0 && (
-          <div className="px-5 py-3 border-t border-light-border dark:border-dark-border text-xs text-light-secondary">
+          <div className={`px-5 py-3 border-t text-xs ${isLight ? 'border-light-border text-light-secondary' : 'border-dark-border text-gray-400'}`}>
             Showing {filteredTransactions.length} record{filteredTransactions.length !== 1 ? 's' : ''}
           </div>
         )}

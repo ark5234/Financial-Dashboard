@@ -14,19 +14,15 @@ import { ArrowUpIcon, ArrowDownIcon, PiggyBankIcon, TrendUpIcon } from '@phospho
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Handle division by zero and clamping
 function pct(tracked: number, budget: number) {
-  return budget > 0 ? Math.round((tracked / budget) * 100) : 0;
+  if (budget <= 0) return 0;
+  return Math.min(Math.round((tracked / budget) * 100), 100);
 }
 function pctBarColor(p: number) {
   if (p >= 100) return 'bg-rose-400';
   if (p >= 80)  return 'bg-warning';
   return 'bg-emerald-400';
-}
-function pctTextColor(p: number, type: TransactionType) {
-  if (type === 'income') return p >= 100 ? 'text-success' : 'text-amber-600';
-  if (p >= 100) return 'text-rose-600';
-  if (p >= 80)  return 'text-amber-600';
-  return 'text-stone-400';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +38,7 @@ interface KpiProps {
 function KpiCard({ label, value, sub, isLight, Icon, iconBg, iconColor, valueColor, children }: KpiProps) {
   return (
     <div className={`
-      card-lift rounded-2xl p-6 relative overflow-hidden select-none
+      card-lift rounded-2xl p-6 relative overflow-hidden select-none transition-all duration-300 hover:-translate-y-1 hover:shadow-lg
       ${isLight
         ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
         : 'bg-dark-card border border-dark-border'}
@@ -70,8 +66,8 @@ function KpiCard({ label, value, sub, isLight, Icon, iconBg, iconColor, valueCol
 
 interface BreakdownRow { category: string; tracked: number; budget: number; }
 
-function BreakdownTable({ title, type, rows, currency, accent, isLight }:
-  { title: string; type: TransactionType; rows: BreakdownRow[]; currency: string; accent: string; isLight: boolean }) {
+function BreakdownTable({ title, rows, currency, accent, isLight }:
+  { title: string; rows: BreakdownRow[]; currency: string; accent: string; isLight: boolean }) {
   const totalTracked = rows.reduce((s, r) => s + r.tracked, 0);
   const totalBudget  = rows.reduce((s, r) => s + r.budget,  0);
 
@@ -79,7 +75,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
     ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
     : 'bg-dark-card border border-dark-border';
   const hdCls   = isLight ? 'text-light-secondary bg-light-bg' : 'text-light-secondary bg-dark/40';
-  const rowHov  = isLight ? 'hover:bg-gray-50' : 'hover:bg-slate-700/20';
+  const rowHov  = isLight ? 'hover:bg-blue-50/50 hover:shadow-sm transition-all duration-300' : 'hover:bg-slate-700/30 transition-all duration-300';
   const divCls  = isLight ? 'divide-gray-100' : 'divide-slate-700/50';
   const foot    = isLight ? 'bg-light-bg border-t-2 border-light-border' : 'bg-dark/30 border-t-2 border-dark-border';
 
@@ -101,49 +97,35 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
           <tr className={`text-xs font-bold uppercase tracking-wide ${hdCls}`}>
             <th className="w-8 px-3 py-2.5" />
             <th className="px-3 py-2.5 text-left">Category</th>
-            <th className="px-4 py-2.5 text-right whitespace-nowrap">Tracked</th>
             <th className="px-4 py-2.5 text-right whitespace-nowrap">Budget</th>
-            <th className="px-4 py-2.5 text-left whitespace-nowrap">Progress</th>
+            <th className="px-4 py-2.5 text-right whitespace-nowrap">Tracked</th>
           </tr>
         </thead>
         <tbody className={`divide-y ${divCls}`}>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-slate-400' : 'text-light-secondary'}`}>
+              <td colSpan={4} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-slate-400' : 'text-light-secondary'}`}>
                 No data for this period
               </td>
             </tr>
           ) : rows.map(row => {
-            const p = pct(row.tracked, row.budget);
             const Icon = CATEGORY_CONFIG[row.category]?.Icon;
             return (
               <tr key={row.category} className={`transition-colors ${rowHov}`}>
                 <td className="px-3 py-4 text-center">
                   {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-slate-400' : 'text-light-secondary'}`} />}
                 </td>
-                <td className={`px-3 py-4 font-medium text-sm ${isLight ? 'text-stone-800' : 'text-gray-200'}`}>
+                <td 
+                  className={`px-3 py-4 font-medium text-sm truncate max-w-[120px] sm:max-w-[200px] ${isLight ? 'text-stone-800' : 'text-gray-200'}`}
+                  title={row.category}
+                >
                   {row.category}
-                </td>
-                <td className={`px-4 py-4 text-right tabular-nums font-bold text-sm ${isLight ? 'text-stone-900' : 'text-gray-100'}`}>
-                  {formatCurrency(row.tracked, currency)}
                 </td>
                 <td className={`px-4 py-4 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
                   {row.budget ? formatCurrency(row.budget, currency) : <span className="italic">–</span>}
                 </td>
-                <td className="px-4 py-4 w-[25%] sm:w-[30%]">
-                  {row.budget > 0 ? (
-                    <div className="flex items-center gap-2 w-full min-w-[110px]">
-                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
-                        <div className={`${pctBarColor(p)} h-2 rounded-full transition-all`}
-                          style={{ width: `${Math.min(p, 100)}%` }} />
-                      </div>
-                      <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
-                        {p}%
-                      </span>
-                    </div>
-                  ) : (
-                    <span className={`text-xs ${isLight ? 'text-slate-400' : 'text-light-secondary'}`}>–</span>
-                  )}
+                <td className={`px-4 py-4 text-right tabular-nums font-bold text-sm ${isLight ? 'text-stone-900' : 'text-gray-100'}`}>
+                  {formatCurrency(row.tracked, currency)}
                 </td>
               </tr>
             );
@@ -154,26 +136,11 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
             <td className={`px-3 py-3 text-xs font-bold uppercase tracking-wider ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               Total
             </td>
-            <td className={`px-4 py-3 text-right tabular-nums text-sm font-bold ${isLight ? 'text-light-primary' : 'text-gray-200'}`}>
-              {formatCurrency(totalTracked, currency)}
-            </td>
             <td className={`px-4 py-3 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               {formatCurrency(totalBudget, currency)}
             </td>
-            <td className="px-4 py-3 w-[25%] sm:w-[30%]">
-              {totalBudget > 0 && (() => {
-                const p = pct(totalTracked, totalBudget);
-                return (
-                  <div className="flex items-center gap-2 w-full min-w-[110px]">
-                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
-                      <div className={`${pctBarColor(p)} h-2 rounded-full`} style={{ width: `${Math.min(p, 100)}%` }} />
-                    </div>
-                    <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
-                      {p}%
-                    </span>
-                  </div>
-                );
-              })()}
+            <td className={`px-4 py-3 text-right tabular-nums text-sm font-bold ${isLight ? 'text-light-primary' : 'text-gray-200'}`}>
+              {formatCurrency(totalTracked, currency)}
             </td>
           </tr>
         </tbody>
@@ -246,7 +213,14 @@ export function DashboardView() {
   const incomeRows  = useMemo(() => makeBreakdown('income'),  [monthlyTx, budgets]);  // eslint-disable-line
   const expenseRows = useMemo(() => makeBreakdown('expense'), [monthlyTx, budgets]);  // eslint-disable-line
   const savingsRows = useMemo(() => makeBreakdown('savings'), [monthlyTx, budgets]);  // eslint-disable-line
-
+  // ── Intelligent Insights ──────────────────────────────────────────────────
+  const topExpense = useMemo(() => expenseRows[0] || null, [expenseRows]);
+  const isOverBudget = periodExpenses > (budgets.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0));
+  const insightMessage = isOverBudget
+    ? `⚠️ Overspending threshold reached overall this month.`
+    : topExpense && topExpense.tracked > 0
+    ? `💡 Top expense this month: ${topExpense.category} (${formatCurrency(topExpense.tracked, currency)})`
+    : `💡 You're on track! Keep it up.`;
   // ── Spending donut (expenses) ─────────────────────────────────────────────
   const spendingDonut = useMemo(() =>
     expenseRows
@@ -307,10 +281,17 @@ export function DashboardView() {
 
       {/* Page Title */}
       <div>
-        <h1 className={`text-2xl font-bold tracking-tight ${heading}`}>
-          {MONTHS[selectedMonth]} {selectedYear}
-        </h1>
-        <p className={`text-sm mt-0.5 ${labelMini}`}>Personal finance overview</p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <h1 className={`text-2xl font-bold tracking-tight ${heading}`}>
+              {MONTHS[selectedMonth]} {selectedYear}
+            </h1>
+            <p className={`text-sm mt-0.5 ${labelMini}`}>Personal finance overview</p>
+          </div>
+          <div className={`text-sm px-4 py-2 rounded-xl flex items-center gap-2 ${isOverBudget ? 'bg-danger-soft text-danger dark:bg-rose-900/20' : 'bg-blue-50 text-blue-700 font-semibold dark:bg-blue-900/20 dark:text-blue-400'}`}>
+            {insightMessage}
+          </div>
+        </div>
       </div>
 
       {/* ── 3 KPI Cards ── */}
@@ -372,9 +353,9 @@ export function DashboardView() {
           <p className={`text-xs font-bold uppercase tracking-[0.14em] ${label}`}>
             Breakdown — {MONTHS[selectedMonth].slice(0, 3)} {selectedYear}
           </p>
-          <BreakdownTable title="Income"   type="income"  accent="bg-success" rows={incomeRows}  currency={currency} isLight={isLight} />
-          <BreakdownTable title="Expenses" type="expense" accent="bg-danger"    rows={expenseRows} currency={currency} isLight={isLight} />
-          <BreakdownTable title="Savings"  type="savings" accent="bg-blue-600"   rows={savingsRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Income"   accent="bg-success" rows={incomeRows}  currency={currency} isLight={isLight} />
+          <BreakdownTable title="Expenses" accent="bg-danger"    rows={expenseRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Savings"  accent="bg-blue-600"   rows={savingsRows} currency={currency} isLight={isLight} />
         </div>
 
         {/* RIGHT: Charts */}
@@ -399,6 +380,8 @@ export function DashboardView() {
                       innerRadius={44} outerRadius={68}
                       paddingAngle={spendingDonut.length > 1 ? 2 : 0}
                       dataKey="value" stroke="none"
+                      isAnimationActive={true}
+                      animationDuration={800}
                     >
                       {(spendingDonut.length > 0
                         ? spendingDonut

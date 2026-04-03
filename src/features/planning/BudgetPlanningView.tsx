@@ -77,7 +77,7 @@ export function BudgetPlanningView() {
         const totalYTD           = sectionActuals.reduce((s, a) => s + a.slice(0, currentMonthIdx + 1).reduce((x, y) => x + y, 0), 0);
 
         return (
-          <div key={type} className="bg-light-card border border-light-border shadow-sm hover:shadow-md transition-shadow dark:border-dark-border overflow-hidden">
+          <div key={type} className="bg-light-card dark:bg-dark-card border border-light-border shadow-sm hover:shadow-md transition-shadow dark:border-dark-border overflow-hidden">
 
             {/* Section header bar */}
             <div className={`${headerBg} text-white px-5 py-3 flex flex-wrap items-center justify-between gap-3`}>
@@ -92,40 +92,43 @@ export function BudgetPlanningView() {
             {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm whitespace-nowrap">
-                <thead className="bg-light-bg dark:bg-dark/60 text-xs text-light-secondary dark:text-light-secondary uppercase tracking-wider border-b border-light-border dark:border-dark-border">
+                <thead className="bg-light-bg dark:bg-dark/60 text-xs text-light-secondary dark:text-gray-400 uppercase tracking-wider border-b border-light-border dark:border-dark-border">
                   <tr>
-                    <th className="sticky left-0 top-0 z-20 bg-light-bg dark:bg-dark-card px-4 py-2.5 text-left min-w-[160px]">Category</th>
-                    <th className="px-4 py-2.5 text-right min-w-[130px] sticky top-0 bg-light-bg dark:bg-dark-card z-10">
+                    <th className="sticky left-0 top-0 z-30 bg-light-bg dark:bg-dark-card px-4 py-2.5 text-left min-w-[160px] shadow-[2px_0_4px_rgba(0,0,0,0.02)]">Category</th>
+                    <th className="px-4 py-2.5 text-right min-w-[130px] sticky top-0 bg-light-bg dark:bg-dark-card z-20">
                       Monthly Budget
                       {currentRole === 'Admin' && <span className="ml-1 text-indigo-400 normal-case font-normal">(editable)</span>}
                     </th>
-                    <th className="px-4 py-2.5 text-right min-w-[110px] sticky top-0 bg-light-bg dark:bg-dark-card z-10">Year Budget</th>
+                    <th className="px-4 py-2.5 text-right min-w-[110px] sticky top-0 bg-light-bg dark:bg-dark-card z-20">Year Budget</th>
                     {SHORT_MONTHS.map((m, i) => (
-                      <th key={m} className={`px-3 py-2.5 text-right min-w-[80px] sticky top-0 bg-light-bg dark:bg-dark-card z-10 ${i === currentMonthIdx ? 'text-indigo-400 font-bold' : ''}`}>
+                      <th key={m} className={`px-3 py-2.5 text-right min-w-[80px] sticky top-0 bg-light-bg dark:bg-dark-card z-20 ${i === currentMonthIdx ? 'text-indigo-400 font-bold' : ''}`}>
                         {m}
                       </th>
                     ))}
-                    <th className="px-4 py-2.5 text-right min-w-[110px] sticky top-0 bg-light-bg dark:bg-dark-card z-10">YTD Total</th>
-                    <th className="px-4 py-2.5 text-right min-w-[70px] sticky top-0 bg-light-bg dark:bg-dark-card z-10">% Done</th>
+                    <th className="px-4 py-2.5 text-right min-w-[110px] sticky top-0 bg-light-bg dark:bg-dark-card z-20">YTD Total</th>
+                    <th className="px-4 py-2.5 text-right min-w-[70px] sticky top-0 bg-light-bg dark:bg-dark-card z-20">% Done</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                <tbody className="divide-y divide-gray-100 dark:divide-slate-700 text-light-primary dark:text-gray-300">
                   {categories.map((cat, ci) => {
                     const actuals    = sectionActuals[ci];
                     const monthly    = getBudget(type, cat);
+                    
+                    const bgHover = 'hover:bg-gray-50/70 dark:hover:bg-slate-700/30 transition-colors duration-150';
+
                     const yearBudget = monthly * 12;
                     const ytd        = actuals.slice(0, currentMonthIdx + 1).reduce((s, v) => s + v, 0);
                     const pctDone    = yearBudget > 0 ? Math.round((ytd / yearBudget) * 100) : 0;
                     const isEditing  = editing?.key === `${type}:${cat}`;
 
                     return (
-                      <tr key={cat} className="hover:bg-light-bg dark:hover:bg-slate-700/30 group transition-colors">
-                        <td className="sticky left-0 z-10 bg-light-card dark:bg-dark-card group-hover:bg-light-bg dark:group-hover:bg-slate-700/30 px-4 py-2.5 font-medium">
+                      <tr key={cat} className={`group ${bgHover}`}>
+                        <td className="sticky left-0 z-10 bg-white dark:bg-dark-card px-4 py-3 font-medium text-light-primary dark:text-gray-100 shadow-[2px_0_4px_rgba(0,0,0,0.02)] transition-colors group-hover:bg-gray-50/70 dark:group-hover:bg-slate-700/50">
                           {cat}
                         </td>
 
                         {/* Monthly budget — editable */}
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-4 py-3 text-right transition-colors">
                           {isEditing ? (
                             <div className="flex items-center justify-end gap-1">
                               <span className="text-light-secondary text-sm">{symbol}</span>
@@ -146,23 +149,23 @@ export function BudgetPlanningView() {
                           ) : (
                             <button
                               onClick={() => currentRole === 'Admin' && startEdit(type, cat)}
-                              className={`tabular-nums flex items-center gap-1 ml-auto ${currentRole === 'Admin' ? 'hover:text-indigo-400 cursor-pointer' : 'cursor-default'}`}
+                              className={`tabular-nums flex items-center gap-1 ml-auto ${currentRole === 'Admin' ? 'hover:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer' : 'cursor-default'}`}
                               title={currentRole === 'Admin' ? 'Click to edit' : undefined}
                             >
-                              {monthly ? formatCurrency(monthly, currency) : <span className="text-light-secondary italic text-xs">Set budget</span>}
+                              {monthly ? formatCurrency(monthly, currency) : <span className="text-light-secondary dark:text-gray-500 italic text-xs">Set budget</span>}
                               {currentRole === 'Admin' && <PencilSimpleIcon size={11} className="opacity-0 group-hover:opacity-40 shrink-0" />}
                             </button>
                           )}
                         </td>
 
-                        <td className="px-4 py-2.5 text-right tabular-nums text-light-secondary">{yearBudget ? formatCurrency(yearBudget, currency) : '—'}</td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-light-secondary dark:text-gray-400">{yearBudget ? formatCurrency(yearBudget, currency) : '—'}</td>
 
                         {actuals.map((actual, mi) => (
                           <td
                             key={mi}
                             className={`px-3 py-2.5 text-right tabular-nums ${
-                              mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20 font-semibold' : ''
-                            } ${actual > 0 ? '' : 'text-light-secondary dark:text-light-secondary'}`}
+                              mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20 font-semibold text-indigo-700 dark:text-indigo-300' : ''
+                            } ${actual > 0 ? '' : 'text-light-secondary dark:text-gray-500'}`}
                           >
                             {fmt(actual)}
                           </td>
@@ -174,7 +177,7 @@ export function BudgetPlanningView() {
                             <span className={`text-xs font-bold tabular-nums ${
                               pctDone >= 100 ? 'text-rose-500' : pctDone >= 75 ? 'text-amber-500' : 'text-success'
                             }`}>{pctDone}%</span>
-                          ) : <span className="text-light-secondary text-xs">—</span>}
+                          ) : <span className="text-light-secondary dark:text-gray-500 text-xs">—</span>}
                         </td>
                       </tr>
                     );
@@ -184,9 +187,9 @@ export function BudgetPlanningView() {
                   <tr className="bg-light-bg dark:bg-dark/50 font-bold border-t-2 border-light-border dark:border-dark-border text-light-secondary dark:text-gray-200">
                     <td className="sticky left-0 z-10 bg-light-bg dark:bg-dark/50 px-4 py-2.5 text-xs uppercase tracking-wider">Total</td>
                     <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(totalMonthlyBudget, currency)}</td>
-                    <td className="px-4 py-2.5 text-right tabular-nums text-light-secondary">{formatCurrency(totalYearBudget, currency)}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums text-light-secondary dark:text-gray-400">{formatCurrency(totalYearBudget, currency)}</td>
                     {monthTotals.map((total, mi) => (
-                      <td key={mi} className={`px-3 py-2.5 text-right tabular-nums ${mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                      <td key={mi} className={`px-3 py-2.5 text-right tabular-nums ${mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20 text-indigo-700 dark:text-indigo-300' : ''}`}>
                         {total > 0 ? formatCurrency(total, currency) : '—'}
                       </td>
                     ))}

@@ -21,6 +21,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
   const [type, setType]               = useState<TransactionType>(initialData?.type || 'expense');
   const [category, setCategory]       = useState(initialData?.category || '');
   const [date, setDate]               = useState(initialData?.date || format(new Date(), 'yyyy-MM-dd'));
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getCategoriesForType = (t: TransactionType) => {
     if (t === 'income')  return INCOME_CATEGORIES;
@@ -33,23 +34,30 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
     setCategory(''); // reset category when type changes
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!description || !amount || !category || !date) return;
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+    
+    setIsSubmitting(true);
 
     const data = { description, amount: parsedAmount, type, category, date };
 
-    if (initialData) {
-      updateTransaction(initialData.id, data);
-      useStore.getState().addToast('Transaction updated successfully', 'success');
-    } else {
-      addTransaction(data);
-      useStore.getState().addToast('Transaction added successfully', 'success');
+    try {
+      if (initialData) {
+        updateTransaction(initialData.id, data);
+        useStore.getState().addToast('Transaction updated successfully', 'success');
+      } else {
+        addTransaction(data);
+        useStore.getState().addToast('Transaction added successfully', 'success');
+      }
+      onClose();
+    } finally {
+      setIsSubmitting(false);
     }
-    onClose();
   };
 
   const typeConfig: Record<TransactionType, { label: string; activeClass: string }> = {
@@ -60,10 +68,10 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-light-card dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-light-card dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden text-light-primary dark:text-gray-100">
         <div className="flex items-center justify-between p-4 border-b border-light-border dark:border-dark-border">
           <h2 className="text-xl font-bold">{initialData ? 'Edit Transaction' : 'Add Transaction'}</h2>
-          <button type="button" aria-label="Close" title="Close" onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-light-secondary">
+          <button type="button" aria-label="Close" title="Close" onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-light-secondary dark:text-gray-400">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -79,7 +87,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                   type="button"
                   onClick={() => handleTypeChange(t)}
                   className={`flex-1 py-2 text-sm font-semibold transition ${
-                    type === t ? typeConfig[t].activeClass : 'text-light-secondary hover:bg-gray-100 dark:hover:bg-dark-card'
+                    type === t ? typeConfig[t].activeClass : 'text-light-secondary dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-card dark:hover:text-gray-200'
                   }`}
                 >
                   {typeConfig[t].label}
@@ -92,7 +100,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
           <div>
             <label htmlFor="tx-amount" className="block text-sm font-medium mb-1">Amount</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-light-secondary">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-light-secondary dark:text-gray-400">$</span>
               <input
                 id="tx-amount"
                 type="number"
@@ -101,7 +109,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                 min="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-700 font-medium"
+                className="w-full pl-8 pr-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100 font-medium"
                 placeholder="0.00"
                 title="Amount"
               />
@@ -117,7 +125,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
               required
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-700"
+              className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100"
               placeholder="e.g. Grocery run, Freelance work..."
               title="Description"
             />
@@ -133,7 +141,7 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-700 text-sm"
+                className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100 text-sm"
                 title="Date"
               />
             </div>
@@ -144,13 +152,13 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
                 required
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-700 text-sm"
+                className="w-full px-4 py-2 border border-light-border dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100 text-sm"
                 title="Category"
                 aria-label="Category"
               >
-                <option value="" disabled>Select category</option>
+                <option value="" disabled className="bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100">Select category</option>
                 {getCategoriesForType(type).map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat} value={cat} className="bg-light-card dark:bg-gray-800 text-light-primary dark:text-gray-100">{cat}</option>
                 ))}
               </select>
             </div>
@@ -161,15 +169,17 @@ export function TransactionForm({ onClose, initialData }: TransactionFormProps) 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 font-medium text-light-secondary dark:text-light-secondary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+              disabled={isSubmitting}
+              className="px-4 py-2 font-medium text-light-secondary dark:text-light-secondary hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm dark:shadow-elite rounded-lg transition"
+              disabled={isSubmitting}
+              className="px-6 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 shadow-sm dark:shadow-elite rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {initialData ? 'Save Changes' : 'Add Transaction'}
+              {isSubmitting ? 'Saving...' : (initialData ? 'Save Changes' : 'Add Transaction')}
             </button>
           </div>
         </form>
