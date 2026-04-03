@@ -2,7 +2,7 @@
 
 A premium, interactive, and responsive finance dashboard engineered to track financial activity, maintain budgets, and visualize spending. Originally developed as a frontend evaluation, it has evolved into a production-grade portfolio piece and a usable local-first personal finance app.
 
-## 🚀 Live Demo | Quick Start
+## Live Demo & Quick Start
 
 ```bash
 # Install dependencies
@@ -15,13 +15,13 @@ npm run dev
 npm run build
 ```
 
-## 💼 Why "Admin" vs "Viewer" Roles?
+## Role System: Admin vs. Viewer
 
 In the context of a portfolio piece, the role system serves a dual purpose:
 1. **Viewer (Demo Mode):** When recruiters or visitors land on the site, they are "Viewers" by default. They can explore the UI, interact with responsive charts, filter tables, and toggle themes. This provides a safe, curated experience of the dashboard without them accidentally deleting the mock data that fuels the visualizations.
 2. **Admin (Personal Use / Full Test):** Switching to "Admin" unlocks the full CRUD (Create, Read, Update, Delete) capabilities. Reviewers can test the form validation and notification systems. Furthermore, because all data is securely persisted in your browser's `localStorage`, you can actually use this site in "Admin" mode as your own private, daily budget tracker without needing a backend database.
 
-## ✨ Core Features & Roadmap
+## Core Features & Roadmap
 
 Inspired by comprehensive spreadsheet budgeting, this dashboard brings structured financial planning to the web.
 
@@ -42,7 +42,7 @@ Inspired by comprehensive spreadsheet budgeting, this dashboard brings structure
    * **Toast Notification System:** Custom-built, strict-typed floating notifications for user feedback.
    * **Role-Based Access Control:** Smooth simulated frontend role switching.
 
-## 🛠️ Tech Stack & Architecture
+## Tech Stack & Architecture
 
 * **Framework:** React 18 (Vite)
 * **Language:** TypeScript (`verbatimModuleSyntax` strict mode enabled)
@@ -51,7 +51,7 @@ Inspired by comprehensive spreadsheet budgeting, this dashboard brings structure
 * **Charts:** Recharts 
 * **Icons:** `@phosphor-icons/react`
 
-## 📐 Architecture Highlights
+## Architecture Highlights
 * **Zustand Persistence:** Stores a complex global payload (Role, Theme, Currency, Toasts, and an 18-record mock dataset spanning 4 months) entirely natively in the browser. 
 * **Centralized Configuration:** Strict mapping utilities for Categories, Icons, and Colors (`CATEGORY_CONFIG`) ensure the UI remains perfectly in sync between forms, tables, and charts.
 * **Zero-Dependency UI Logic:** Built custom Toast notification and layout systems to demonstrate deep React knowledge without relying on heavy external component libraries.
