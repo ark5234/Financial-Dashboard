@@ -14,13 +14,23 @@ const INCOME_CATEGORIES  = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'
 const SAVINGS_CATEGORIES = ['Emergency Fund', 'Retirement', 'Stock Portfolio', 'Sinking Fund'];
 
 export function TransactionForm({ onClose, initialData }: TransactionFormProps) {
-  const { addTransaction, updateTransaction } = useStore();
+  const { addTransaction, updateTransaction, selectedMonth, selectedYear } = useStore();
+
+  const getDefaultDate = () => {
+    if (initialData?.date) return initialData.date;
+    const now = new Date();
+    // If the viewed month is different from the current month, default to the 1st of the viewed month
+    if (now.getMonth() !== selectedMonth || now.getFullYear() !== selectedYear) {
+      return format(new Date(selectedYear, selectedMonth, 1), 'yyyy-MM-dd');
+    }
+    return format(now, 'yyyy-MM-dd');
+  };
 
   const [description, setDescription] = useState(initialData?.description || '');
   const [amount, setAmount]           = useState(initialData?.amount.toString() || '');
   const [type, setType]               = useState<TransactionType>(initialData?.type || 'expense');
   const [category, setCategory]       = useState(initialData?.category || '');
-  const [date, setDate]               = useState(initialData?.date || format(new Date(), 'yyyy-MM-dd'));
+  const [date, setDate]               = useState(getDefaultDate());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getCategoriesForType = (t: TransactionType) => {
