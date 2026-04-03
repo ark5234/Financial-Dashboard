@@ -161,7 +161,7 @@ export function BudgetPlanningView() {
                           <td
                             key={mi}
                             className={`px-3 py-2.5 text-right tabular-nums ${
-                              mi === currentMonthIdx ? 'bg-indigo-50/60 dark:bg-indigo-900/10 font-semibold' : ''
+                              mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20 font-semibold' : ''
                             } ${actual > 0 ? '' : 'text-light-secondary dark:text-light-secondary'}`}
                           >
                             {fmt(actual)}
@@ -186,7 +186,7 @@ export function BudgetPlanningView() {
                     <td className="px-4 py-2.5 text-right tabular-nums">{formatCurrency(totalMonthlyBudget, currency)}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums text-light-secondary">{formatCurrency(totalYearBudget, currency)}</td>
                     {monthTotals.map((total, mi) => (
-                      <td key={mi} className={`px-3 py-2.5 text-right tabular-nums ${mi === currentMonthIdx ? 'bg-indigo-50/60 dark:bg-indigo-900/10' : ''}`}>
+                      <td key={mi} className={`px-3 py-2.5 text-right tabular-nums ${mi === currentMonthIdx ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
                         {total > 0 ? formatCurrency(total, currency) : '—'}
                       </td>
                     ))}

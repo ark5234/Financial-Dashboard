@@ -57,7 +57,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <div className={`${NAV_H} px-4 flex items-center gap-3 shrink-0 border-b ${
           isLight ? 'border-light-border' : 'border-dark-border'
         }`}>
-          <div className="w-8 h-8 rounded-xl bg-warning flex items-center justify-center shrink-0 shadow-md dark:shadow-elite shadow-amber-400/40">
+          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-md dark:shadow-elite shadow-blue-500/40">
             <Wallet size={18} weight="fill" className="text-white" />
           </div>
           <span className={`font-extrabold text-lg tracking-tight ${isLight ? 'text-light-primary' : 'text-white'}`}>
@@ -165,7 +165,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Mobile logo */}
           <div className="sm:hidden flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-warning flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
               <Wallet size={15} weight="fill" className="text-white" />
             </div>
             <span className={`font-bold text-sm ${isLight ? 'text-light-primary' : 'text-white'}`}>Spendly</span>

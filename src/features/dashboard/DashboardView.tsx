@@ -35,14 +35,14 @@ function pctTextColor(p: number, type: TransactionType) {
 
 interface KpiProps {
   label: string; value: string; sub?: string; isLight: boolean;
-  topColor: string; Icon: React.ElementType;
+  Icon: React.ElementType;
   iconBg: string; iconColor: string; valueColor?: string;
   children?: React.ReactNode;
 }
-function KpiCard({ label, value, sub, isLight, topColor, Icon, iconBg, iconColor, valueColor, children }: KpiProps) {
+function KpiCard({ label, value, sub, isLight, Icon, iconBg, iconColor, valueColor, children }: KpiProps) {
   return (
     <div className={`
-      card-lift rounded-2xl p-6 relative overflow-hidden border-t-4 ${topColor} select-none
+      card-lift rounded-2xl p-6 relative overflow-hidden select-none
       ${isLight
         ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
         : 'bg-dark-card border border-dark-border'}
@@ -79,7 +79,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
     ? 'bg-light-card border border-light-border shadow-sm dark:shadow-elite'
     : 'bg-dark-card border border-dark-border';
   const hdCls   = isLight ? 'text-light-secondary bg-light-bg' : 'text-light-secondary bg-dark/40';
-  const rowHov  = isLight ? 'hover:bg-warning-soft text-warning/30' : 'hover:bg-slate-700/20';
+  const rowHov  = isLight ? 'hover:bg-gray-50' : 'hover:bg-slate-700/20';
   const divCls  = isLight ? 'divide-gray-100' : 'divide-slate-700/50';
   const foot    = isLight ? 'bg-light-bg border-t-2 border-light-border' : 'bg-dark/30 border-t-2 border-dark-border';
 
@@ -109,7 +109,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
         <tbody className={`divide-y ${divCls}`}>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-amber-600/50' : 'text-light-secondary'}`}>
+              <td colSpan={5} className={`px-4 py-6 text-center italic text-sm ${isLight ? 'text-slate-400' : 'text-light-secondary'}`}>
                 No data for this period
               </td>
             </tr>
@@ -119,7 +119,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
             return (
               <tr key={row.category} className={`transition-colors ${rowHov}`}>
                 <td className="px-3 py-4 text-center">
-                  {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-amber-300' : 'text-light-secondary'}`} />}
+                  {Icon && <Icon className={`w-3.5 h-3.5 ${isLight ? 'text-slate-400' : 'text-light-secondary'}`} />}
                 </td>
                 <td className={`px-3 py-4 font-medium text-sm ${isLight ? 'text-stone-800' : 'text-gray-200'}`}>
                   {row.category}
@@ -130,10 +130,10 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
                 <td className={`px-4 py-4 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
                   {row.budget ? formatCurrency(row.budget, currency) : <span className="italic">–</span>}
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-4 w-[25%] sm:w-[30%]">
                   {row.budget > 0 ? (
-                    <div className="flex items-center gap-2 min-w-[110px]">
-                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
+                    <div className="flex items-center gap-2 w-full min-w-[110px]">
+                      <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
                         <div className={`${pctBarColor(p)} h-2 rounded-full transition-all`}
                           style={{ width: `${Math.min(p, 100)}%` }} />
                       </div>
@@ -142,7 +142,7 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
                       </span>
                     </div>
                   ) : (
-                    <span className={`text-xs ${isLight ? 'text-amber-300' : 'text-light-secondary'}`}>–</span>
+                    <span className={`text-xs ${isLight ? 'text-slate-400' : 'text-light-secondary'}`}>–</span>
                   )}
                 </td>
               </tr>
@@ -160,12 +160,12 @@ function BreakdownTable({ title, type, rows, currency, accent, isLight }:
             <td className={`px-4 py-3 text-right tabular-nums text-sm ${isLight ? 'text-light-secondary' : 'text-light-secondary'}`}>
               {formatCurrency(totalBudget, currency)}
             </td>
-            <td className="px-4 py-3">
+            <td className="px-4 py-3 w-[25%] sm:w-[30%]">
               {totalBudget > 0 && (() => {
                 const p = pct(totalTracked, totalBudget);
                 return (
-                  <div className="flex items-center gap-2 min-w-[110px]">
-                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
+                  <div className="flex items-center gap-2 w-full min-w-[110px]">
+                    <div className={`flex-1 rounded-full h-2 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
                       <div className={`${pctBarColor(p)} h-2 rounded-full`} style={{ width: `${Math.min(p, 100)}%` }} />
                     </div>
                     <span className={`text-xs font-bold tabular-nums w-10 text-right shrink-0 ${pctTextColor(p, type)}`}>
@@ -190,7 +190,7 @@ const MONTHS       = ['January','February','March','April','May','June','July','
 const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const TT_STYLE     = {
   backgroundColor: '#0f172a', color: '#f8fafc',
-  borderRadius: '10px', border: '1px solid rgba(245,158,11,0.2)',
+  borderRadius: '10px', border: '1px solid rgba(148,163,184,0.2)',
   fontSize: '12px', padding: '8px 12px',
 };
 
@@ -321,7 +321,6 @@ export function DashboardView() {
           value={formatCurrency(netBalance, currency)}
           sub="income – expenses – savings"
           isLight={isLight}
-          topColor={netBalance >= 0 ? 'border-t-emerald-500' : 'border-t-rose-500'}
           Icon={netBalance >= 0 ? TrendUpIcon : ArrowDownIcon}
           iconBg={netBalance >= 0 ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}
           iconColor={netBalance >= 0 ? 'text-success' : 'text-rose-600'}
@@ -336,15 +335,14 @@ export function DashboardView() {
           label="Savings Rate"
           value={`${savingsRate}%`}
           isLight={isLight}
-          topColor="border-t-amber-500"
           Icon={PiggyBankIcon}
-          iconBg="bg-warning-soft text-warning"
-          iconColor="text-amber-600"
-          valueColor={isLight ? 'text-amber-700' : 'text-amber-400'}
+          iconBg="bg-blue-50 text-blue-600"
+          iconColor="text-blue-600"
+          valueColor={isLight ? 'text-amber-600' : 'text-amber-400'}
         >
-          <div className={`w-full rounded-full h-2 mt-3 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
+          <div className={`w-full rounded-full h-2 mt-3 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
             <div
-              className="bg-warning h-2 rounded-full transition-all"
+              className="bg-amber-500 h-2 rounded-full transition-all"
               style={{ width: `${Math.min(100, parseFloat(savingsRate))}%` }}
             />
           </div>
@@ -355,14 +353,13 @@ export function DashboardView() {
           value={`${incomeTrackedPct}%`}
           sub={`vs ${formatCurrency(budgetIncome, currency)} budget`}
           isLight={isLight}
-          topColor={incomeTrackedPct >= 100 ? 'border-t-emerald-500' : 'border-t-amber-400'}
           Icon={ArrowUpIcon}
-          iconBg={incomeTrackedPct >= 100 ? 'bg-success-soft text-success' : 'bg-warning-soft text-warning'}
-          iconColor={incomeTrackedPct >= 100 ? 'text-success' : 'text-amber-600'}
+          iconBg={incomeTrackedPct >= 100 ? 'bg-success-soft text-success' : 'bg-blue-50 text-blue-600'}
+          iconColor={incomeTrackedPct >= 100 ? 'text-success' : 'text-blue-600'}
           valueColor={
             incomeTrackedPct >= 100
               ? (isLight ? 'text-success' : 'text-emerald-400')
-              : (isLight ? 'text-amber-700'   : 'text-amber-400')
+              : (isLight ? 'text-blue-700'   : 'text-blue-400')
           }
         />
       </div>
@@ -377,7 +374,7 @@ export function DashboardView() {
           </p>
           <BreakdownTable title="Income"   type="income"  accent="bg-success" rows={incomeRows}  currency={currency} isLight={isLight} />
           <BreakdownTable title="Expenses" type="expense" accent="bg-danger"    rows={expenseRows} currency={currency} isLight={isLight} />
-          <BreakdownTable title="Savings"  type="savings" accent="bg-warning"   rows={savingsRows} currency={currency} isLight={isLight} />
+          <BreakdownTable title="Savings"  type="savings" accent="bg-blue-600"   rows={savingsRows} currency={currency} isLight={isLight} />
         </div>
 
         {/* RIGHT: Charts */}
@@ -397,7 +394,7 @@ export function DashboardView() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={spendingDonut.length > 0 ? spendingDonut : [{ name: 'None', value: 1, fill: isLight ? '#fde68a' : '#1e293b' }]}
+                      data={spendingDonut.length > 0 ? spendingDonut : [{ name: 'None', value: 1, fill: isLight ? '#E2E8F0' : '#1e293b' }]}
                       cx="50%" cy="50%"
                       innerRadius={44} outerRadius={68}
                       paddingAngle={spendingDonut.length > 1 ? 2 : 0}
@@ -405,7 +402,7 @@ export function DashboardView() {
                     >
                       {(spendingDonut.length > 0
                         ? spendingDonut
-                        : [{ name: 'None', value: 1, fill: isLight ? '#fde68a' : '#1e293b' }]
+                        : [{ name: 'None', value: 1, fill: isLight ? '#E2E8F0' : '#1e293b' }]
                       ).map((e, i) => <Cell key={i} fill={e.fill} />)}
                     </Pie>
                     <Tooltip
@@ -469,7 +466,7 @@ export function DashboardView() {
                       </div>
                     </div>
                     {/* Bar */}
-                    <div className={`w-full rounded-full h-2 ${isLight ? 'bg-warning-soft text-warning' : 'bg-slate-700'}`}>
+                    <div className={`w-full rounded-full h-2 ${isLight ? 'bg-gray-200' : 'bg-slate-700'}`}>
                       <div
                         className={`${pctBarColor(row.p)} h-2 rounded-full transition-all duration-500`}
                         style={{ width: `${Math.min(row.p, 100)}%` }}
@@ -490,14 +487,14 @@ export function DashboardView() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthData} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
                   <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" stroke="#92400e" fontSize={10} tickLine={false} axisLine={false} dy={8} />
-                  <YAxis stroke="#92400e" fontSize={10} tickLine={false} axisLine={false}
+                  <XAxis dataKey="name" stroke="#64748B" fontSize={10} tickLine={false} axisLine={false} dy={8} />
+                  <YAxis stroke="#64748B" fontSize={10} tickLine={false} axisLine={false}
                     tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)} />
-                  <Tooltip contentStyle={TT_STYLE} cursor={{ fill: 'rgba(245,158,11,0.05)' }}
+                  <Tooltip contentStyle={TT_STYLE} cursor={{ fill: 'rgba(148,163,184,0.1)' }}
                     formatter={(v) => v != null ? formatCurrency(Number(v), currency) : ''} />
                   <Bar dataKey="income"   name="Income"   fill="#16A34A" maxBarSize={16} radius={[6, 6, 0, 0]} />
                   <Bar dataKey="expenses" name="Expenses" fill="#DC2626" maxBarSize={16} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="savings"  name="Savings"  fill="#D97706" maxBarSize={16} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="savings"  name="Savings"  fill="#2563EB" maxBarSize={16} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -510,12 +507,12 @@ export function DashboardView() {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { key: 'income',   lbl: 'YTD Income',   val: formatCurrency(ytd.income,   currency), accent: 'border-t-emerald-500', vc: isLight ? 'text-emerald-700' : 'text-emerald-400' },
-                { key: 'expenses', lbl: 'YTD Expenses', val: formatCurrency(ytd.expenses, currency), accent: 'border-t-rose-500',    vc: isLight ? 'text-rose-700'    : 'text-rose-400'    },
-                { key: 'savings',  lbl: 'YTD Savings',  val: formatCurrency(ytd.savings,  currency), accent: 'border-t-amber-500',   vc: isLight ? 'text-amber-700'   : 'text-amber-400'   },
-                { key: 'rate',     lbl: 'Savings Rate', val: `${ytd.rate}%`,                         accent: 'border-t-amber-400',   vc: isLight ? 'text-amber-700'   : 'text-amber-400'   },
+                { key: 'income',   lbl: 'YTD Income',   val: formatCurrency(ytd.income,   currency), vc: isLight ? 'text-emerald-700' : 'text-emerald-400' },
+                { key: 'expenses', lbl: 'YTD Expenses', val: formatCurrency(ytd.expenses, currency), vc: isLight ? 'text-rose-700'    : 'text-rose-400'    },
+                { key: 'savings',  lbl: 'YTD Savings',  val: formatCurrency(ytd.savings,  currency), vc: isLight ? 'text-blue-700'    : 'text-blue-400'    },
+                { key: 'rate',     lbl: 'Savings Rate', val: `${ytd.rate}%`,                         vc: isLight ? 'text-amber-600'   : 'text-amber-400'   },
               ].map(s => (
-                <div key={s.key} className={`card-lift ${card} p-4 border-t-4 ${s.accent}`}>
+                <div key={s.key} className={`card-lift ${card} p-4`}>
                   <p className={`text-[10px] font-bold uppercase tracking-[0.14em] mb-2 ${labelMini}`}>{s.lbl}</p>
                   <p className={`text-base font-bold tabular-nums ${s.vc}`}>{s.val}</p>
                 </div>
